@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --vintage-bg: #FDFCFB;
+  --vintage-text: #5E4030;
+  --vintage-accent: #8B5CF6;
+}
+
+@theme {
+  --color-primary: #8B5CF6;
+  --color-secondary: #10B981;
+  --color-vintage-50: #FDFCFB;
+  --color-vintage-100: #F7F3F0;
+  --color-vintage-200: #EFE6DF;
+  --color-vintage-300: #E2D1C3;
+  --color-vintage-400: #D4BBA6;
+  --color-vintage-500: #C6A489;
+  --color-vintage-600: #B38C6F;
+  --color-vintage-700: #966E55;
+  --color-vintage-800: #7A5641;
+  --color-vintage-900: #5E4030;
+  
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-serif: "Playfair Display", "serif";
+}
+
+@layer base {
+  body {
+    @apply bg-vintage-50 text-vintage-900 font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .vintage-glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
+  }
+
+  .vintage-button {
+    @apply px-6 py-2 bg-vintage-800 text-white rounded-full hover:bg-vintage-700 transition-colors duration-300;
+  }
+
+  .vintage-card {
+    @apply bg-white border border-vintage-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300;
+  }
+}
