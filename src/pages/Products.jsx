@@ -1,33 +1,47 @@
-import React, { useState } from 'react';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, SlidersHorizontal, Loader2, AlertCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-
-const allProducts = [
-  { id: 1, name: 'Vintage Brass Mirror', price: 45.00, category: 'Decor', image: 'https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?w=400&h=500&fit=crop', isNew: true },
-  { id: 2, name: 'Ceramic Tea Set', price: 32.50, category: 'Kitchen', image: 'https://images.unsplash.com/photo-1565193998248-d500a72183b1?w=400&h=500&fit=crop' },
-  { id: 3, name: 'Antique Typewriter', price: 120.00, category: 'Collectibles', image: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=400&h=500&fit=crop' },
-  { id: 4, name: 'Velvet Armchair', price: 85.00, category: 'Furniture', image: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400&h=500&fit=crop', isNew: true },
-  { id: 5, name: 'Wooden Wall Clock', price: 55.00, category: 'Decor', image: 'https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400&h=500&fit=crop' },
-  { id: 6, name: 'Silver Cutlery Set', price: 75.00, category: 'Kitchen', image: 'https://images.unsplash.com/photo-1591133303642-1250f28e515d?w=400&h=500&fit=crop' },
-  { id: 7, name: 'Leather Suitcase', price: 95.00, category: 'Collectibles', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=500&fit=crop' },
-  { id: 8, name: 'Brass Candlestick', price: 18.00, category: 'Decor', image: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=400&h=500&fit=crop' },
-];
+import { getProducts } from '../api/products';
 
 const categories = ['All', 'Decor', 'Kitchen', 'Collectibles', 'Furniture'];
 
 const Products = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  const filteredProducts = allProducts
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const { data } = await getProducts();
+        setProducts(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products. Please ensure the backend server is running.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = products
     .filter(p => selectedCategory === 'All' || p.category === selectedCategory)
     .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'price-low') return a.price - b.price;
       if (sortBy === 'price-high') return b.price - a.price;
-      return b.id - a.id; // newest
+      // Use createdAt for newest if available, else fallback to id or _id
+      const dateA = a.createdAt ? new Date(a.createdAt) : a._id || a.id;
+      const dateB = b.createdAt ? new Date(b.createdAt) : b._id || b.id;
+      return dateB > dateA ? 1 : -1;
     });
 
   return (
@@ -90,11 +104,28 @@ const Products = () => {
           </div>
         </div>
 
-        {/* Product Grid */}
-        {filteredProducts.length > 0 ? (
+        {/* Content Area */}
+        {loading ? (
+          <div className="py-24 flex flex-col items-center justify-center text-vintage-400">
+            <Loader2 className="animate-spin mb-4" size={48} />
+            <p className="text-lg font-medium">Loading treasures...</p>
+          </div>
+        ) : error ? (
+          <div className="py-24 flex flex-col items-center justify-center text-red-500 bg-red-50 rounded-2xl border border-red-100 p-8">
+            <AlertCircle className="mb-4" size={48} />
+            <h3 className="text-xl font-serif font-bold mb-2">Something went wrong</h3>
+            <p className="text-center max-w-md mb-6">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-8 py-3 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id || product.id} product={product} />
             ))}
           </div>
         ) : (
@@ -114,19 +145,21 @@ const Products = () => {
         )}
 
         {/* Pagination Placeholder */}
-        <div className="mt-16 flex justify-center">
-          <nav className="flex items-center gap-2">
-            <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-400 hover:border-primary hover:text-primary transition-colors disabled:opacity-50" disabled>
-              &larr;
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full bg-vintage-900 text-white shadow-md">1</button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">2</button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">3</button>
-            <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">
-              &rarr;
-            </button>
-          </nav>
-        </div>
+        {!loading && !error && filteredProducts.length > 0 && (
+          <div className="mt-16 flex justify-center">
+            <nav className="flex items-center gap-2">
+              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-400 hover:border-primary hover:text-primary transition-colors disabled:opacity-50" disabled>
+                &larr;
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full bg-vintage-900 text-white shadow-md">1</button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">2</button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">3</button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">
+                &rarr;
+              </button>
+            </nav>
+          </div>
+        )}
       </main>
 
       <footer className="bg-white border-t border-vintage-200 py-12 mt-24">
