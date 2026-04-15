@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = 'http://localhost:3001/api';
+const BASE = 'https://smartbuyserver1.vercel.app/api';
 
 // Product API
 export const getProducts = (params = {}) => {
