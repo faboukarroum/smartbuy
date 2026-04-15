@@ -5,11 +5,13 @@ import ProductDetail from '../pages/ProductDetail'
 import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
 import Login from '../pages/Login'
-// import AdminLayout from '../admin/AdminLayout'
-// import Dashboard from '../admin/Dashboard'
-// import ProductList from '../admin/ProductList'
-// import ProductForm from '../admin/ProductForm'
-// import ProtectedRoute from '../components/ProtectedRoute'
+import Register from '../pages/Register'
+import AdminLayout from '../admin/AdminLayout'
+import Dashboard from '../admin/Dashboard'
+import ProductList from '../admin/ProductList'
+import ProductForm from '../admin/ProductForm'
+import Orders from '../admin/Orders'
+import ProtectedRoute from '../components/ProtectedRoute'
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
@@ -18,12 +20,8 @@ const router = createBrowserRouter([
   { path: '/cart', element: <Cart /> },
   { path: '/checkout', element: <Checkout /> },
   { path: '/login', element: <Login /> },
-  
-])
-
-export default router
-
-/*{
+  { path: '/register', element: <Register /> },
+  {
     path: '/admin',
     element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
     children: [
@@ -31,5 +29,9 @@ export default router
       { path: 'products', element: <ProductList /> },
       { path: 'products/new', element: <ProductForm /> },
       { path: 'products/:id/edit', element: <ProductForm /> },
+      { path: 'orders', element: <Orders /> },
     ]
-  }*/
+  }
+])
+
+export default router

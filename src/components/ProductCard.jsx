@@ -24,7 +24,7 @@ const ProductCard = ({ product }) => {
         {/* Quick actions overlay */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-3">
           <Link 
-            to={`/products/${product.id}`}
+            to={`/products/${product._id || product.id}`}
             className="p-3 bg-white text-vintage-900 rounded-full hover:bg-primary hover:text-white transition-colors duration-300 shadow-lg"
           >
             <Eye size={20} />
@@ -48,7 +48,7 @@ const ProductCard = ({ product }) => {
         <h3 className="text-sm font-medium text-vintage-500 uppercase tracking-widest mb-1">
           {product.category}
         </h3>
-        <Link to={`/products/${product.id}`} className="block text-lg font-serif font-bold text-vintage-900 hover:text-primary transition-colors mb-2">
+        <Link to={`/products/${product._id || product.id}`} className="block text-lg font-serif font-bold text-vintage-900 hover:text-primary transition-colors mb-2">
           {product.name}
         </Link>
         <p className="text-lg font-medium text-primary">

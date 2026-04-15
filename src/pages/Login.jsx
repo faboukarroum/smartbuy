@@ -1,19 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import Navbar from '../components/Navbar';
+import { loginUser } from '../api/products';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login } = useAuthStore();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
-  const onSubmit = (data) => {
-    // Mock login
-    login({ email: data.email, name: 'John Doe', role: 'user' });
-    navigate('/');
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      setApiError(null);
+      const response = await loginUser(data.email, data.password);
+      login(response.data);
+      
+      // Redirect based on role
+      if (response.data.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setApiError(err.response?.data?.message || 'Invalid email or password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,6 +46,13 @@ const Login = () => {
                 <h1 className="text-3xl font-serif font-bold text-vintage-900 mb-2">Welcome Back</h1>
                 <p className="text-vintage-500">Sign in to your SmartBuy account</p>
               </div>
+
+              {apiError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+                  <AlertCircle size={20} className="flex-shrink-0" />
+                  <p className="text-sm font-medium">{apiError}</p>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div>
@@ -63,10 +88,20 @@ const Login = () => {
 
                 <button 
                   type="submit" 
-                  className="w-full vintage-button !py-4 flex items-center justify-center gap-3 shadow-lg shadow-primary/20"
+                  disabled={loading}
+                  className="w-full vintage-button !py-4 flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign In
-                  <ArrowRight size={20} />
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      Signing In...
+                    </>
+                  ) : (
+                    <>
+                      Sign In
+                      <ArrowRight size={20} />
+                    </>
+                  )}
                 </button>
               </form>
 

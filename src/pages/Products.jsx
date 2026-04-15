@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, Loader2, AlertCircle } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
 
-const categories = ['All', 'Decor', 'Kitchen', 'Collectibles', 'Furniture'];
+const categories = ['All', 'tools', 'kitchen', 'decor', 'bedding', 'furniture', 'electronics', 'home'];
+const pageSizes = [20, 50, 100];
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -13,13 +14,27 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const { data } = await getProducts();
-        setProducts(data);
+        const { data } = await getProducts({
+          keyword: searchQuery,
+          category: selectedCategory,
+          pageNumber: currentPage,
+          pageSize: itemsPerPage,
+          sortBy
+        });
+        setProducts(data.products);
+        setTotalPages(data.pages);
+        setTotalItems(data.count);
         setError(null);
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -30,19 +45,20 @@ const Products = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [selectedCategory, searchQuery, sortBy, currentPage, itemsPerPage]);
 
-  const filteredProducts = products
-    .filter(p => selectedCategory === 'All' || p.category === selectedCategory)
-    .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => {
-      if (sortBy === 'price-low') return a.price - b.price;
-      if (sortBy === 'price-high') return b.price - a.price;
-      // Use createdAt for newest if available, else fallback to id or _id
-      const dateA = a.createdAt ? new Date(a.createdAt) : a._id || a.id;
-      const dateB = b.createdAt ? new Date(b.createdAt) : b._id || b.id;
-      return dateB > dateA ? 1 : -1;
-    });
+  // Reset to first page when filters or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy, itemsPerPage]);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = (currentPage - 1) * itemsPerPage;
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-vintage-50">
@@ -57,49 +73,77 @@ const Products = () => {
         </header>
 
         {/* Filters & Tools */}
-        <div className="flex flex-col md:flex-row gap-6 mb-12 items-center justify-between">
-          {/* Categories */}
-          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                  selectedCategory === cat 
-                    ? 'bg-vintage-900 text-white shadow-md' 
-                    : 'bg-white text-vintage-600 border border-vintage-200 hover:border-primary'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-4 w-full md:w-auto">
-            {/* Search */}
-            <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              />
+        <div className="flex flex-col space-y-6 mb-12">
+          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+            {/* Categories */}
+            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap capitalize ${
+                    selectedCategory === cat 
+                      ? 'bg-vintage-900 text-white shadow-md' 
+                      : 'bg-white text-vintage-600 border border-vintage-200 hover:border-primary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
 
-            {/* Sort */}
-            <div className="relative">
-              <select 
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none pl-4 pr-10 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-vintage-700"
-              >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-              <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 text-vintage-400 pointer-events-none" size={16} />
+            <div className="flex gap-4 w-full md:w-auto">
+              {/* Search */}
+              <div className="relative flex-1 md:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-400" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Search items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
+
+              {/* Sort */}
+              <div className="relative">
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="appearance-none pl-4 pr-10 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-vintage-700"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                </select>
+                <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 text-vintage-400 pointer-events-none" size={16} />
+              </div>
+            </div>
+          </div>
+
+          {/* Items Per Page & Stats */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/50 p-4 rounded-2xl border border-vintage-100">
+            <p className="text-sm text-vintage-600">
+              Showing <span className="font-bold text-vintage-900">{indexOfFirstItem + 1}</span> to <span className="font-bold text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> of <span className="font-bold text-vintage-900">{totalItems}</span> items
+            </p>
+            
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-vintage-600 font-medium">Items per page:</label>
+              <div className="flex gap-1">
+                {pageSizes.map(size => (
+                  <button
+                    key={size}
+                    onClick={() => setItemsPerPage(size)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      itemsPerPage === size
+                        ? 'bg-vintage-900 text-white shadow-sm'
+                        : 'bg-white text-vintage-500 border border-vintage-200 hover:border-primary hover:text-primary'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -122,9 +166,9 @@ const Products = () => {
               Try Again
             </button>
           </div>
-        ) : filteredProducts.length > 0 ? (
+        ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredProducts.map(product => (
+            {products.map(product => (
               <ProductCard key={product._id || product.id} product={product} />
             ))}
           </div>
@@ -144,20 +188,63 @@ const Products = () => {
           </div>
         )}
 
-        {/* Pagination Placeholder */}
-        {!loading && !error && filteredProducts.length > 0 && (
-          <div className="mt-16 flex justify-center">
+        {/* Pagination UI */}
+        {!loading && !error && totalPages > 1 && (
+          <div className="mt-16 flex flex-col items-center gap-4">
             <nav className="flex items-center gap-2">
-              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-400 hover:border-primary hover:text-primary transition-colors disabled:opacity-50" disabled>
-                &larr;
+              <button 
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={20} />
               </button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-full bg-vintage-900 text-white shadow-md">1</button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">2</button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">3</button>
-              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors">
-                &rarr;
+              
+              <div className="flex items-center gap-2">
+                {[...Array(totalPages)].map((_, i) => {
+                  const pageNum = i + 1;
+                  // Show current page, first, last, and pages around current
+                  if (
+                    pageNum === 1 || 
+                    pageNum === totalPages || 
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => paginate(pageNum)}
+                        className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-vintage-900 text-white shadow-lg scale-110'
+                            : 'bg-white text-vintage-600 border border-vintage-200 hover:border-primary hover:text-primary'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  }
+                  // Show ellipses
+                  if (
+                    pageNum === currentPage - 2 || 
+                    pageNum === currentPage + 2
+                  ) {
+                    return <span key={pageNum} className="text-vintage-400 font-bold px-1">...</span>;
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button 
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={20} />
               </button>
             </nav>
+            <p className="text-xs text-vintage-400 font-medium">
+              Page {currentPage} of {totalPages}
+            </p>
           </div>
         )}
       </main>
