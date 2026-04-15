@@ -58,10 +58,10 @@ const ProductForm = () => {
           const formattedData = {
             ...data,
             images: data.images?.map(img => ({ url: img })) || [],
-            details: data.details?.map(det => ({ text: detail })) || []
+            details: data.details?.map(det => ({ text: det })) || []
           };
           reset(data); // reset with raw data for now, handles strings better if API returns strings
-          
+
           // Manual fix for field arrays if needed
           if (data.images) setValue('images', data.images.map(img => ({ url: img })));
           if (data.details) setValue('details', data.details.map(det => ({ text: det })));
