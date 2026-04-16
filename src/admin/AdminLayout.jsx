@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -20,6 +20,21 @@ const AdminLayout = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+
+    const syncSidebarState = (event) => {
+      setIsSidebarOpen(event.matches);
+    };
+
+    setIsSidebarOpen(mediaQuery.matches);
+    mediaQuery.addEventListener('change', syncSidebarState);
+
+    return () => {
+      mediaQuery.removeEventListener('change', syncSidebarState);
+    };
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -32,13 +47,32 @@ const AdminLayout = () => {
     { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
   ];
 
+  const handleSidebarToggle = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  const handleMobileNavClick = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="fixed inset-0 z-40 bg-slate-950/40 md:hidden"
+          onClick={handleSidebarToggle}
+        />
+      )}
+
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 bg-vintage-900 text-white transition-all duration-300 ${
-          isSidebarOpen ? 'w-64' : 'w-20'
-        } hidden md:flex flex-col`}
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-vintage-900 text-white transition-all duration-300 ${
+          isSidebarOpen
+            ? 'w-64 translate-x-0'
+            : 'w-64 -translate-x-full md:w-20 md:translate-x-0'
+        }`}
       >
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
@@ -50,6 +84,14 @@ const AdminLayout = () => {
               <span className="text-primary font-serif font-bold italic text-2xl">S</span>
             </div>
           )}
+          <button
+            type="button"
+            onClick={handleSidebarToggle}
+            className="rounded-lg p-2 text-white/80 hover:bg-white/10 md:hidden"
+            aria-label="Close admin navigation"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -58,6 +100,7 @@ const AdminLayout = () => {
               key={item.path}
               to={item.path}
               end={item.path === '/admin'}
+              onClick={handleMobileNavClick}
               className={({ isActive }) => `
                 flex items-center gap-4 px-4 py-3 rounded-xl transition-all
                 ${isActive 
@@ -89,8 +132,16 @@ const AdminLayout = () => {
         {/* Header */}
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleSidebarToggle}
+              className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg md:hidden"
+              aria-label="Open admin navigation"
+            >
+              <Menu size={20} />
+            </button>
             <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              onClick={handleSidebarToggle}
               className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg hidden md:block"
             >
               <Menu size={20} />
