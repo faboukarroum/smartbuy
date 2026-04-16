@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Truck, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useCartStore from '../store/cartStore';
+import ProductImage from '../components/ProductImage';
 
 const Checkout = () => {
   const { items, clearCart } = useCartStore();
@@ -107,7 +108,7 @@ const Checkout = () => {
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-16 h-16 bg-vintage-50 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    <ProductImage product={item} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-vintage-900 text-sm">{item.name}</h4>

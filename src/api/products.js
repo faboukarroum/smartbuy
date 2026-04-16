@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const BASE = 'https://smartbuyserver1.vercel.app/api';
+const BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:3001/api'
+    : 'https://smartbuyserver1.vercel.app/api');
 
 // Product API
 export const getProducts = (params = {}) => {
@@ -27,6 +31,21 @@ export const deleteProduct = (id) => {
   return axios.delete(`${BASE}/products/${id}`, config);
 };
 
+export const uploadProductImage = (file) => {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const config = {
+    ...getAuthConfig(),
+    headers: {
+      ...getAuthConfig().headers,
+      'Content-Type': 'multipart/form-data',
+    },
+  };
+
+  return axios.post(`${BASE}/uploads/product-image`, formData, config);
+};
+
 // Order API
 export const getOrders = () => {
   const config = getAuthConfig();
@@ -45,6 +64,11 @@ export const loginUser = (email, password) => {
 
 export const registerUser = (name, email, password) => {
   return axios.post(`${BASE}/users`, { name, email, password });
+};
+
+export const getUsers = () => {
+  const config = getAuthConfig();
+  return axios.get(`${BASE}/users`, config);
 };
 
 // Helper for auth headers

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useCartStore from '../store/cartStore';
+import ProductImage from '../components/ProductImage';
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, clearCart } = useCartStore();
@@ -25,7 +26,7 @@ const Cart = () => {
               {items.map((item) => (
                 <div key={item.id} className="flex flex-col sm:flex-row gap-6 p-6 bg-white rounded-2xl border border-vintage-200 shadow-sm">
                   <div className="w-full sm:w-32 h-40 rounded-lg overflow-hidden bg-vintage-100 flex-shrink-0">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    <ProductImage product={item} alt={item.name} className="w-full h-full object-cover" />
                   </div>
                   
                   <div className="flex-1 flex flex-col justify-between">

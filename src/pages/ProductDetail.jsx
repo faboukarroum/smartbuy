@@ -4,6 +4,8 @@ import { ShoppingCart, Heart, ArrowLeft, Shield, Truck, RotateCcw, Loader2, Aler
 import Navbar from '../components/Navbar';
 import useCartStore from '../store/cartStore';
 import { getProductById } from '../api/products';
+import ProductImage from '../components/ProductImage';
+import { getProductImageCandidates, getProductFallbackImage } from '../utils/productImages';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -33,14 +35,15 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  const allImages = product?.images?.length > 0 ? product.images : [product?.image];
+  const allImages = product ? getProductImageCandidates(product) : [];
+  const galleryImages = allImages.length > 0 ? allImages : [getProductFallbackImage(product)];
 
   const nextImage = () => {
-    setSelectedImage((prev) => (prev + 1) % allImages.length);
+    setSelectedImage((prev) => (prev + 1) % galleryImages.length);
   };
 
   const prevImage = () => {
-    setSelectedImage((prev) => (prev - 1 + allImages.length) % allImages.length);
+    setSelectedImage((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
   };
 
   if (loading) {
@@ -94,14 +97,15 @@ const ProductDetail = () => {
           <div className="space-y-4">
             {/* Main Image */}
             <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-white border border-vintage-200 shadow-sm">
-              <img 
-                src={allImages[selectedImage]} 
+              <ProductImage
+                product={product}
+                src={galleryImages[selectedImage]}
                 alt={`${product.name} - Image ${selectedImage + 1}`} 
                 className="w-full h-full object-cover"
               />
               
               {/* Navigation arrows for multiple images */}
-              {allImages.length > 1 && (
+              {galleryImages.length > 1 && (
                 <>
                   <button 
                     onClick={prevImage}
@@ -121,17 +125,17 @@ const ProductDetail = () => {
               )}
 
               {/* Image counter */}
-              {allImages.length > 1 && (
+              {galleryImages.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-full text-white text-sm font-medium">
-                  {selectedImage + 1} / {allImages.length}
+                  {selectedImage + 1} / {galleryImages.length}
                 </div>
               )}
             </div>
 
             {/* Thumbnails */}
-            {allImages.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="grid grid-cols-4 gap-4">
-                {allImages.map((image, index) => (
+                {galleryImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -141,8 +145,9 @@ const ProductDetail = () => {
                         : 'border-vintage-200 hover:border-primary/50'
                     }`}
                   >
-                    <img 
-                      src={image} 
+                    <ProductImage
+                      product={product}
+                      src={image}
                       alt={`${product.name} thumbnail ${index + 1}`} 
                       className="w-full h-full object-cover"
                     />

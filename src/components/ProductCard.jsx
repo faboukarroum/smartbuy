@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useCartStore from '../store/cartStore';
+import ProductImage from './ProductImage';
 
 const ProductCard = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
@@ -15,8 +16,8 @@ const ProductCard = ({ product }) => {
       className="vintage-card group"
     >
       <div className="relative aspect-[4/5] overflow-hidden">
-        <img 
-          src={product.image || 'https://via.placeholder.com/400x500?text=Bric+a+Brac'} 
+        <ProductImage
+          product={product}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />

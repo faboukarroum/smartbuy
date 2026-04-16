@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   ShoppingBag, 
   Search, 
@@ -20,6 +21,11 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    setSearchTerm(searchParams.get('q') || '');
+  }, [searchParams]);
 
   const fetchOrders = async () => {
     try {
@@ -70,7 +76,19 @@ const Orders = () => {
               type="text" 
               placeholder="Search by Order ID or Customer..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchTerm(value);
+                const nextParams = new URLSearchParams(searchParams);
+
+                if (value.trim()) {
+                  nextParams.set('q', value);
+                } else {
+                  nextParams.delete('q');
+                }
+
+                setSearchParams(nextParams, { replace: true });
+              }}
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
             />
           </div>

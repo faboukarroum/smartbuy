@@ -1,18 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Star, Shield, Clock } from 'lucide-react';
+import { ArrowRight, Star, Shield, Clock, Loader2, AlertCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-
-const featuredProducts = [
-  { id: 1, name: 'Vintage Brass Mirror', price: 45.00, category: 'Decor', image: 'https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?w=400&h=500&fit=crop', isNew: true },
-  { id: 2, name: 'Ceramic Tea Set', price: 32.50, category: 'Kitchen', image: 'https://images.unsplash.com/photo-1565193998248-d500a72183b1?w=400&h=500&fit=crop' },
-  { id: 3, name: 'Antique Typewriter', price: 120.00, category: 'Collectibles', image: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=400&h=500&fit=crop' },
-  { id: 4, name: 'Velvet Armchair', price: 85.00, category: 'Furniture', image: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400&h=500&fit=crop', isNew: true },
-];
+import { getProducts } from '../api/products';
 
 const Home = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const [featuredError, setFeaturedError] = useState('');
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        setLoadingFeatured(true);
+        const { data } = await getProducts({ pageSize: 100, sortBy: 'newest' });
+        const products = Array.isArray(data?.products) ? data.products : [];
+        const newProducts = products.filter((product) => product.isNew).slice(0, 4);
+
+        setFeaturedProducts(newProducts);
+        setFeaturedError('');
+      } catch (error) {
+        console.error('Error fetching featured home products:', error);
+        setFeaturedError('Unable to load new arrivals right now.');
+      } finally {
+        setLoadingFeatured(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -91,19 +110,36 @@ const Home = () => {
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-4xl font-serif font-bold text-vintage-900 mb-2">Featured Collection</h2>
-              <p className="text-vintage-600">Handpicked treasures for your modern home.</p>
+              <h2 className="text-4xl font-serif font-bold text-vintage-900 mb-2">New Arrivals</h2>
+              <p className="text-vintage-600">Freshly added pieces marked as new in the collection.</p>
             </div>
             <Link to="/products" className="text-primary font-bold border-b-2 border-primary hover:text-primary/80 transition-colors">
               View All Products
             </Link>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+
+          {loadingFeatured ? (
+            <div className="py-20 flex flex-col items-center justify-center text-vintage-400">
+              <Loader2 className="animate-spin mb-4" size={40} />
+              <p className="font-medium">Loading new arrivals...</p>
+            </div>
+          ) : featuredError ? (
+            <div className="py-16 flex flex-col items-center justify-center text-red-500 bg-red-50 rounded-2xl border border-red-100 p-8">
+              <AlertCircle className="mb-4" size={40} />
+              <p className="font-medium">{featuredError}</p>
+            </div>
+          ) : featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product._id || product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-16 text-center bg-white rounded-2xl border border-vintage-200">
+              <h3 className="text-2xl font-serif font-bold text-vintage-900 mb-2">No New Arrivals Yet</h3>
+              <p className="text-vintage-600">Mark products as new in the admin panel and they will appear here.</p>
+            </div>
+          )}
         </div>
       </section>
 

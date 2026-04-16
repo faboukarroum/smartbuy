@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
@@ -14,6 +14,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { getProducts, deleteProduct } from '../api/products';
+import ProductImage from '../components/ProductImage';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -23,6 +24,11 @@ const ProductList = () => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
 
   const fetchProducts = async () => {
     try {
@@ -81,14 +87,27 @@ const ProductList = () => {
         <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search products by name..." 
-              value={searchTerm}
-              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
-            />
-          </div>
+              <input 
+                type="text" 
+                placeholder="Search products by name..." 
+                value={searchTerm}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchQuery(value);
+                  setPage(1);
+                  const nextParams = new URLSearchParams(searchParams);
+
+                  if (value.trim()) {
+                    nextParams.set('q', value);
+                  } else {
+                    nextParams.delete('q');
+                  }
+
+                  setSearchParams(nextParams, { replace: true });
+                }}
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+              />
+            </div>
           
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Filter size={16} />
@@ -125,7 +144,7 @@ const ProductList = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
-                          <img src={product.image} alt="" className="h-full w-full object-cover" />
+                          <ProductImage product={product} alt={product.name} className="h-full w-full object-cover" />
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 text-sm line-clamp-1">{product.name}</p>

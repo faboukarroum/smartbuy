@@ -7,12 +7,14 @@ import {
   Plus, 
   Trash2, 
   Image as ImageIcon,
+  Upload,
   Loader2,
   AlertCircle,
   CheckCircle2,
   Info
 } from 'lucide-react';
-import { getProductById, createProduct, updateProduct } from '../api/products';
+import { getProductById, createProduct, updateProduct, uploadProductImage } from '../api/products';
+import ProductImage from '../components/ProductImage';
 
 const categories = ['tools', 'kitchen', 'decor', 'bedding', 'furniture', 'electronics', 'home'];
 
@@ -21,6 +23,9 @@ const ProductForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [uploadingMainImage, setUploadingMainImage] = useState(false);
+  const [uploadingGalleryIndex, setUploadingGalleryIndex] = useState(null);
+  const [uploadingNewGalleryImage, setUploadingNewGalleryImage] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -47,6 +52,14 @@ const ProductForm = () => {
     control,
     name: "details"
   });
+  const mainImage = watch('image');
+  const galleryImages = watch('images');
+  const previewProduct = {
+    name: watch('name') || 'Product Preview',
+    category: watch('category') || 'home',
+    image: mainImage,
+    images: Array.isArray(galleryImages) ? galleryImages.map((entry) => entry?.url).filter(Boolean) : [],
+  };
 
   useEffect(() => {
     if (id) {
@@ -77,6 +90,66 @@ const ProductForm = () => {
       fetchProduct();
     }
   }, [id, reset, setValue]);
+
+  const handleMainImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      setUploadingMainImage(true);
+      setError(null);
+      const { data } = await uploadProductImage(file);
+      setValue('image', data.imageUrl, { shouldDirty: true, shouldValidate: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upload main image');
+    } finally {
+      setUploadingMainImage(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleNewGalleryImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      setUploadingNewGalleryImage(true);
+      setError(null);
+      const { data } = await uploadProductImage(file);
+      appendImage({ url: data.imageUrl });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upload gallery image');
+    } finally {
+      setUploadingNewGalleryImage(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleGalleryImageUpload = async (event, index) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      setUploadingGalleryIndex(index);
+      setError(null);
+      const { data } = await uploadProductImage(file);
+      setValue(`images.${index}.url`, data.imageUrl, { shouldDirty: true, shouldValidate: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upload gallery image');
+    } finally {
+      setUploadingGalleryIndex(null);
+      event.target.value = '';
+    }
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -228,23 +301,50 @@ const ProductForm = () => {
                 <ImageIcon size={18} className="text-primary" />
                 Product Images
               </h3>
-              <button 
-                type="button"
-                onClick={() => appendImage({ url: '' })}
-                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-              >
-                <Plus size={14} /> Add Image URL
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  type="button"
+                  onClick={() => appendImage({ url: '' })}
+                  className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                >
+                  <Plus size={14} /> Add Image URL
+                </button>
+                <label className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">
+                  {uploadingNewGalleryImage ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                  Upload Gallery Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleNewGalleryImageUpload}
+                    disabled={uploadingNewGalleryImage}
+                  />
+                </label>
+              </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Main Image (Cover)</label>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="block text-sm font-bold text-slate-700">Main Image (Cover)</label>
+                  <label className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">
+                    {uploadingMainImage ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                    Upload Main Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleMainImageUpload}
+                      disabled={uploadingMainImage}
+                    />
+                  </label>
+                </div>
                 <input 
                   {...register('image', { required: 'Main image is required' })}
                   className={`w-full px-4 py-3 bg-slate-50 border ${errors.image ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all`}
                   placeholder="https://images.unsplash.com/..."
                 />
+                <p className="mt-2 text-xs text-slate-400">Paste an image link or upload a file. Broken or generic placeholder URLs will fall back to a category image in the storefront.</p>
               </div>
 
               <div className="space-y-3">
@@ -256,6 +356,16 @@ const ProductForm = () => {
                       className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-primary"
                       placeholder="Additional image URL..."
                     />
+                    <label className="p-2 text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                      {uploadingGalleryIndex === index ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => handleGalleryImageUpload(event, index)}
+                        disabled={uploadingGalleryIndex === index}
+                      />
+                    </label>
                     <button 
                       type="button" 
                       onClick={() => removeImage(index)}
@@ -265,6 +375,20 @@ const ProductForm = () => {
                     </button>
                   </div>
                 ))}
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4">
+                <p className="mb-3 text-sm font-bold text-slate-700">Preview</p>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <div className="aspect-[4/5] overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <ProductImage product={previewProduct} alt={previewProduct.name} className="h-full w-full object-cover" />
+                  </div>
+                  {previewProduct.images.slice(0, 3).map((image, index) => (
+                    <div key={`${image}-${index}`} className="aspect-[4/5] overflow-hidden rounded-xl border border-slate-200 bg-white">
+                      <ProductImage product={previewProduct} src={image} alt={`${previewProduct.name} preview ${index + 1}`} className="h-full w-full object-cover" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

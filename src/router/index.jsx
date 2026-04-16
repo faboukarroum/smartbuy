@@ -11,6 +11,7 @@ import Dashboard from '../admin/Dashboard'
 import ProductList from '../admin/ProductList'
 import ProductForm from '../admin/ProductForm'
 import Orders from '../admin/Orders'
+import Users from '../admin/Users'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 const router = createBrowserRouter([
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
       { path: 'products/new', element: <ProductForm /> },
       { path: 'products/:id/edit', element: <ProductForm /> },
       { path: 'orders', element: <Orders /> },
+      { path: 'users', element: <Users /> },
     ]
   }
 ])
