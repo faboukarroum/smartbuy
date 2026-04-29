@@ -15,8 +15,8 @@ import useAuthStore from '../store/authStore';
 const fallbackUsers = [
   {
     _id: 'sample-admin-1',
-    name: 'Smart Buy Admin',
-    email: 'admin@smartbuy.local',
+    name: 'Fi Kil Shi Admin',
+    email: 'admin@fikilshi.local',
     role: 'admin',
     createdAt: new Date().toISOString(),
   },
@@ -63,12 +63,12 @@ const Users = () => {
         setUsers(userList);
         setError('');
         setUsingFallback(false);
-      } catch (err) {
+      } catch {
         const adminUser = user
           ? [{
               _id: user._id || 'current-admin',
               name: user.name || 'Admin',
-              email: user.email || 'admin@smartbuy.local',
+              email: user.email || 'admin@fikilshi.local',
               role: user.role || 'admin',
               createdAt: user.createdAt || new Date().toISOString(),
             }]
@@ -101,7 +101,7 @@ const Users = () => {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-2xl font-serif font-bold text-slate-900">Users</h1>
-          <p className="text-sm text-slate-500">Review the people who can access and shop with SmartBuy.</p>
+          <p className="text-sm text-slate-500">Review the people who can access and shop with Fi Kil Shi.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

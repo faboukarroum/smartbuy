@@ -73,7 +73,7 @@ export const getUsers = () => {
 
 // Helper for auth headers
 const getAuthConfig = () => {
-  const authData = JSON.parse(localStorage.getItem('smartbuy-auth'));
+  const authData = JSON.parse(localStorage.getItem('fikilshi-auth') || localStorage.getItem('smartbuy-auth'));
   const token = authData?.state?.user?.token;
   return {
     headers: {

@@ -7,33 +7,34 @@ const useCartStore = create(
       items: [],
       
       addToCart: (product) => set((state) => {
-        const existingItem = state.items.find((item) => item.id === product.id);
+        const productId = product._id || product.id;
+        const existingItem = state.items.find((item) => (item._id || item.id) === productId);
         if (existingItem) {
           return {
             items: state.items.map((item) =>
-              item.id === product.id
+              (item._id || item.id) === productId
                 ? { ...item, quantity: item.quantity + (product.quantity || 1) }
                 : item
             ),
           };
         }
-        return { items: [...state.items, { ...product, quantity: product.quantity || 1 }] };
+        return { items: [...state.items, { ...product, id: productId, quantity: product.quantity || 1 }] };
       }),
 
       removeFromCart: (productId) => set((state) => ({
-        items: state.items.filter((item) => item.id !== productId),
+        items: state.items.filter((item) => (item._id || item.id) !== productId),
       })),
 
       updateQuantity: (productId, quantity) => set((state) => ({
         items: state.items.map((item) =>
-          item.id === productId ? { ...item, quantity } : item
+          (item._id || item.id) === productId ? { ...item, quantity } : item
         ),
       })),
 
       clearCart: () => set({ items: [] }),
     }),
     {
-      name: 'smartbuy-cart',
+      name: 'fikilshi-cart',
     }
   )
 );

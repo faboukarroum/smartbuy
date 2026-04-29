@@ -59,7 +59,7 @@ const ProductList = () => {
       try {
         await deleteProduct(id);
         fetchProducts();
-      } catch (err) {
+      } catch {
         alert('Failed to delete product');
       }
     }

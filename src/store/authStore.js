@@ -18,7 +18,7 @@ const useAuthStore = create(
       }),
     }),
     {
-      name: 'smartbuy-auth',
+      name: 'fikilshi-auth',
     }
   )
 );

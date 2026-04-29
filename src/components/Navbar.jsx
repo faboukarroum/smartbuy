@@ -3,11 +3,14 @@ import { Link, NavLink } from 'react-router-dom';
 import { ShoppingCart, User, Search, Menu, X } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
+import usePreferencesStore from '../store/preferencesStore';
+import { BRAND_NAME } from '../config/brand';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const cartItems = useCartStore((state) => state.items);
   const { user, logout } = useAuthStore();
+  const { language, currency, toggleLanguage, toggleCurrency } = usePreferencesStore();
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
@@ -15,7 +18,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="text-2xl font-serif font-bold text-vintage-900 tracking-tighter">
-          Smart<span className="text-primary">Buy</span>
+          {BRAND_NAME.split(' ').slice(0, 2).join(' ')}<span className="text-primary"> Shi</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -30,8 +33,24 @@ const Navbar = () => {
 
         {/* Actions */}
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-vintage-700 hover:text-primary transition-colors">
+          <button className="p-2 text-vintage-700 hover:text-primary transition-colors" aria-label="Search products">
             <Search size={20} />
+          </button>
+
+          <button
+            onClick={toggleCurrency}
+            className="hidden sm:inline-flex rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-bold text-vintage-700 hover:border-primary hover:text-primary"
+            aria-label="Toggle currency"
+          >
+            {currency}
+          </button>
+
+          <button
+            onClick={toggleLanguage}
+            className="hidden sm:inline-flex rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-bold text-vintage-700 hover:border-primary hover:text-primary"
+            aria-label="Toggle language"
+          >
+            {language === 'en' ? 'AR' : 'EN'}
           </button>
           
           <Link to="/cart" className="p-2 text-vintage-700 hover:text-primary transition-colors relative">
@@ -53,8 +72,8 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <Link to="/login" className="vintage-button !px-4 !py-1.5 text-sm">
-              Login
+            <Link to="/login" className="p-2 text-vintage-700 hover:text-primary transition-colors" aria-label="Account">
+              <User size={20} />
             </Link>
           )}
 
@@ -70,6 +89,8 @@ const Navbar = () => {
         <div className="md:hidden mt-4 pb-4 space-y-4 border-t border-vintage-100 pt-4">
           <NavLink to="/" className="block text-lg font-medium text-vintage-700" onClick={() => setIsOpen(false)}>Home</NavLink>
           <NavLink to="/products" className="block text-lg font-medium text-vintage-700" onClick={() => setIsOpen(false)}>Shop</NavLink>
+          <button onClick={toggleCurrency} className="block text-lg font-medium text-vintage-700">{currency}</button>
+          <button onClick={toggleLanguage} className="block text-lg font-medium text-vintage-700">{language === 'en' ? 'Arabic' : 'English'}</button>
           <Link to="/login" className="block text-lg font-medium text-vintage-700" onClick={() => setIsOpen(false)}>Login</Link>
         </div>
       )}

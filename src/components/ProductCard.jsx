@@ -1,20 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
-import { motion } from 'framer-motion';
 import useCartStore from '../store/cartStore';
+import usePreferencesStore from '../store/preferencesStore';
 import ProductImage from './ProductImage';
+import { getDisplayPrice } from '../utils/pricing';
 
 const ProductCard = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
+  const currency = usePreferencesStore((state) => state.currency);
+  const displayPrice = getDisplayPrice(product, currency);
+  const stock = Number(product.stock);
+  const isLimited = Number.isFinite(stock) && stock > 0 && stock <= 5;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5 }}
-      className="vintage-card group"
-    >
+    <div className="vintage-card group transition-transform duration-300 hover:-translate-y-1">
       <div className="relative aspect-[4/5] overflow-hidden">
         <ProductImage
           product={product}
@@ -43,6 +43,11 @@ const ProductCard = ({ product }) => {
             New
           </span>
         )}
+        {isLimited && (
+          <span className="absolute top-4 right-4 px-3 py-1 bg-amber-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
+            Only {stock} left
+          </span>
+        )}
       </div>
       
       <div className="p-4 text-center">
@@ -52,11 +57,11 @@ const ProductCard = ({ product }) => {
         <Link to={`/products/${product._id || product.id}`} className="block text-lg font-serif font-bold text-vintage-900 hover:text-primary transition-colors mb-2">
           {product.name}
         </Link>
-        <p className="text-lg font-medium text-primary">
-          ${product.price?.toFixed(2)}
+        <p className="text-lg font-bold text-primary">
+          {displayPrice.label}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

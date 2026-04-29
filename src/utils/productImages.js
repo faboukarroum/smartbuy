@@ -34,7 +34,7 @@ export const getProductFallbackImage = (product = {}) => {
   const safeProduct = product ?? {};
   const category = (safeProduct.category || 'home').toLowerCase();
   const [primary, secondary] = CATEGORY_COLORS[category] || CATEGORY_COLORS.home;
-  const label = encodeURIComponent(safeProduct.name || toTitleCase(category) || 'SmartBuy Item');
+  const label = encodeURIComponent(safeProduct.name || toTitleCase(category) || 'Fi Kil Shi Item');
   const categoryLabel = encodeURIComponent(toTitleCase(category));
 
   return `data:image/svg+xml;utf8,

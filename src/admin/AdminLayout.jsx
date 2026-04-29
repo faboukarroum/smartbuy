@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import { getOrders, getProducts, getUsers } from '../api/products';
+import { BRAND_NAME } from '../config/brand';
 
 const formatRelativeDate = (value) => {
   if (!value) {
@@ -52,7 +53,9 @@ const formatRelativeDate = (value) => {
 };
 
 const AdminLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
+    typeof window === 'undefined' ? true : window.matchMedia('(min-width: 768px)').matches
+  );
   const [headerSearch, setHeaderSearch] = useState('');
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificationsState, setNotificationsState] = useState({
@@ -72,7 +75,6 @@ const AdminLayout = () => {
       setIsSidebarOpen(event.matches);
     };
 
-    setIsSidebarOpen(mediaQuery.matches);
     mediaQuery.addEventListener('change', syncSidebarState);
 
     return () => {
@@ -132,6 +134,7 @@ const AdminLayout = () => {
       location.pathname.startsWith('/admin/orders') ||
       location.pathname.startsWith('/admin/users')
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHeaderSearch(searchParams.get('q') || '');
       return;
     }
@@ -239,7 +242,7 @@ const AdminLayout = () => {
           loading: false,
           items: nextItems.slice(0, 5),
         });
-      } catch (error) {
+      } catch {
         setNotificationsState({
           loading: false,
           items: [
@@ -297,11 +300,11 @@ const AdminLayout = () => {
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
             <Link to="/" className="text-xl font-serif font-bold text-white tracking-tighter flex items-center gap-2">
-              Smart<span className="text-primary italic">Buy</span> Admin
+              {BRAND_NAME} Admin
             </Link>
           ) : (
             <div className="w-full flex justify-center">
-              <span className="text-primary font-serif font-bold italic text-2xl">S</span>
+              <span className="text-primary font-serif font-bold italic text-2xl">F</span>
             </div>
           )}
           <button
@@ -368,7 +371,7 @@ const AdminLayout = () => {
             </button>
             <div className="md:hidden">
                <Link to="/" className="text-xl font-serif font-bold text-vintage-900 tracking-tighter">
-                Smart<span className="text-primary italic">Buy</span>
+                {BRAND_NAME}
               </Link>
             </div>
             <form onSubmit={handleHeaderSearchSubmit} className="hidden lg:flex items-center bg-slate-100 rounded-full px-4 py-2 w-64 ml-4">

@@ -5,6 +5,7 @@ import { Mail, Lock, User, ArrowRight, Loader2, AlertCircle } from 'lucide-react
 import useAuthStore from '../store/authStore';
 import Navbar from '../components/Navbar';
 import { registerUser } from '../api/products';
+import { BRAND_NAME } from '../config/brand';
 
 const Register = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
@@ -40,7 +41,7 @@ const Register = () => {
             <div className="p-8 md:p-12">
               <div className="text-center mb-10">
                 <h1 className="text-3xl font-serif font-bold text-vintage-900 mb-2">Create Account</h1>
-                <p className="text-vintage-500">Join the SmartBuy community</p>
+                <p className="text-vintage-500">Create a {BRAND_NAME} account to save carts and order history</p>
               </div>
 
               {apiError && (

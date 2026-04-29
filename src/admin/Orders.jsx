@@ -50,7 +50,7 @@ const Orders = () => {
       try {
         await updateOrderToDelivered(id);
         fetchOrders();
-      } catch (err) {
+      } catch {
         alert('Failed to update order status');
       }
     }

@@ -21,6 +21,7 @@ const ProductImage = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentIndex(0);
   }, [candidates, src]);
 

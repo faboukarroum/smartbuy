@@ -3,6 +3,7 @@ import { Search, Filter, SlidersHorizontal, Loader2, AlertCircle, ChevronLeft, C
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
+import usePreferencesStore from '../store/preferencesStore';
 
 const categories = ['All', 'tools', 'kitchen', 'decor', 'bedding', 'furniture', 'electronics', 'home'];
 const pageSizes = [20, 50, 100];
@@ -20,6 +21,7 @@ const Products = () => {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const language = usePreferencesStore((state) => state.language);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -66,9 +68,11 @@ const Products = () => {
       
       <main className="container mx-auto px-4 md:px-8 py-12">
         <header className="mb-12">
-          <h1 className="text-4xl font-serif font-bold text-vintage-900 mb-4">Our Collection</h1>
+          <h1 className="text-4xl font-serif font-bold text-vintage-900 mb-4">{language === 'ar' ? 'كل المنتجات' : 'All Products'}</h1>
           <p className="text-vintage-600 max-w-xl">
-            Browse our carefully curated selection of unique finds. Each piece has been inspected and verified by our experts.
+            {language === 'ar'
+              ? 'تسوق منتجات جديدة بأسعار أوتلت. الكميات محدودة والطلب متاح عبر الموقع أو واتساب.'
+              : 'Shop new outlet finds at easy prices. Quantities are limited, and you can order online or through WhatsApp.'}
           </p>
         </header>
 
@@ -98,7 +102,7 @@ const Products = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-400" size={18} />
                 <input 
                   type="text" 
-                  placeholder="Search items..."
+                  placeholder={language === 'ar' ? 'فتش على منتج...' : 'Search items...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -112,7 +116,7 @@ const Products = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="appearance-none pl-4 pr-10 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-vintage-700"
                 >
-                  <option value="newest">Newest First</option>
+                  <option value="newest">{language === 'ar' ? 'الأحدث أولاً' : 'Newest First'}</option>
                   <option value="price-low">Price: Low to High</option>
                   <option value="price-high">Price: High to Low</option>
                 </select>
@@ -124,11 +128,11 @@ const Products = () => {
           {/* Items Per Page & Stats */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/50 p-4 rounded-2xl border border-vintage-100">
             <p className="text-sm text-vintage-600">
-              Showing <span className="font-bold text-vintage-900">{indexOfFirstItem + 1}</span> to <span className="font-bold text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> of <span className="font-bold text-vintage-900">{totalItems}</span> items
+              {language === 'ar' ? 'عم نعرض' : 'Showing'} <span className="font-bold text-vintage-900">{indexOfFirstItem + 1}</span> {language === 'ar' ? 'إلى' : 'to'} <span className="font-bold text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> {language === 'ar' ? 'من' : 'of'} <span className="font-bold text-vintage-900">{totalItems}</span> {language === 'ar' ? 'منتج' : 'items'}
             </p>
             
             <div className="flex items-center gap-3">
-              <label className="text-sm text-vintage-600 font-medium">Items per page:</label>
+              <label className="text-sm text-vintage-600 font-medium">{language === 'ar' ? 'منتجات بالصفحة:' : 'Items per page:'}</label>
               <div className="flex gap-1">
                 {pageSizes.map(size => (
                   <button
@@ -152,18 +156,18 @@ const Products = () => {
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center text-vintage-400">
             <Loader2 className="animate-spin mb-4" size={48} />
-            <p className="text-lg font-medium">Loading treasures...</p>
+            <p className="text-lg font-medium">{language === 'ar' ? 'عم نحمّل المنتجات...' : 'Loading products...'}</p>
           </div>
         ) : error ? (
           <div className="py-24 flex flex-col items-center justify-center text-red-500 bg-red-50 rounded-2xl border border-red-100 p-8">
             <AlertCircle className="mb-4" size={48} />
-            <h3 className="text-xl font-serif font-bold mb-2">Something went wrong</h3>
+            <h3 className="text-xl font-serif font-bold mb-2">{language === 'ar' ? 'صار في مشكلة' : 'Something went wrong'}</h3>
             <p className="text-center max-w-md mb-6">{error}</p>
             <button 
               onClick={() => window.location.reload()}
               className="px-8 py-3 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors"
             >
-              Try Again
+              {language === 'ar' ? 'جرّب مرة تانية' : 'Try Again'}
             </button>
           </div>
         ) : products.length > 0 ? (
@@ -177,13 +181,13 @@ const Products = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-vintage-100 rounded-full text-vintage-400 mb-4">
               <Filter size={32} />
             </div>
-            <h3 className="text-xl font-serif font-bold text-vintage-900 mb-2">No items found</h3>
-            <p className="text-vintage-600">Try adjusting your filters or search terms.</p>
+            <h3 className="text-xl font-serif font-bold text-vintage-900 mb-2">{language === 'ar' ? 'ما لقينا منتجات' : 'No items found'}</h3>
+            <p className="text-vintage-600">{language === 'ar' ? 'جرّب غيّر الفلاتر أو كلمة البحث.' : 'Try adjusting your filters or search terms.'}</p>
             <button 
               onClick={() => { setSelectedCategory('All'); setSearchQuery(''); }}
               className="mt-6 text-primary font-bold border-b-2 border-primary"
             >
-              Clear all filters
+              {language === 'ar' ? 'امسح الفلاتر' : 'Clear all filters'}
             </button>
           </div>
         )}
@@ -243,7 +247,7 @@ const Products = () => {
               </button>
             </nav>
             <p className="text-xs text-vintage-400 font-medium">
-              Page {currentPage} of {totalPages}
+              {language === 'ar' ? 'صفحة' : 'Page'} {currentPage} {language === 'ar' ? 'من' : 'of'} {totalPages}
             </p>
           </div>
         )}
@@ -251,7 +255,7 @@ const Products = () => {
 
       <footer className="bg-white border-t border-vintage-200 py-12 mt-24">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-vintage-400 text-sm">© 2026 SmartBuy Bric-a-Brac. All rights reserved.</p>
+          <p className="text-vintage-400 text-sm">© 2026 Fi Kil Shi. All rights reserved.</p>
         </div>
       </footer>
     </div>

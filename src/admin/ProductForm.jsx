@@ -67,12 +67,6 @@ const ProductForm = () => {
         try {
           setFetching(true);
           const { data } = await getProductById(id);
-          // Map array of strings to objects for useFieldArray
-          const formattedData = {
-            ...data,
-            images: data.images?.map(img => ({ url: img })) || [],
-            details: data.details?.map(det => ({ text: det })) || []
-          };
           reset(data); // reset with raw data for now, handles strings better if API returns strings
 
           // Manual fix for field arrays if needed
@@ -237,7 +231,7 @@ const ProductForm = () => {
                 <input 
                   {...register('name', { required: 'Name is required' })}
                   className={`w-full px-4 py-3 bg-slate-50 border ${errors.name ? 'border-red-500' : 'border-slate-200'} rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all`}
-                  placeholder="e.g., Vintage Brass Mirror"
+                  placeholder="e.g., Home Storage Basket"
                 />
                 {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
               </div>
