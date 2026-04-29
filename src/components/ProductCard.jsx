@@ -39,25 +39,25 @@ const ProductCard = ({ product }) => {
         </div>
         
         {product.isNew && (
-          <span className="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
+          <span className="absolute left-4 top-4 rounded-full bg-gradient-to-r from-secondary to-primary px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">
             New
           </span>
         )}
         {isLimited && (
-          <span className="absolute top-4 right-4 px-3 py-1 bg-amber-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
+          <span className="absolute right-4 top-4 rounded-full bg-vintage-900 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">
             Only {stock} left
           </span>
         )}
       </div>
       
-      <div className="p-4 text-center">
-        <h3 className="text-sm font-medium text-vintage-500 uppercase tracking-widest mb-1">
+      <div className="p-4">
+        <h3 className="mb-1 text-xs font-black uppercase tracking-wide text-primary">
           {product.category}
         </h3>
-        <Link to={`/products/${product._id || product.id}`} className="block text-lg font-serif font-bold text-vintage-900 hover:text-primary transition-colors mb-2">
+        <Link to={`/products/${product._id || product.id}`} className="mb-3 block min-h-12 text-lg font-black leading-tight text-vintage-900 transition-colors hover:text-primary">
           {product.name}
         </Link>
-        <p className="text-lg font-bold text-primary">
+        <p className="text-2xl font-black text-vintage-900">
           {displayPrice.label}
         </p>
       </div>

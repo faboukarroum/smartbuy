@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertCircle, ChevronLeft, ChevronRight, Filter, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
@@ -15,13 +15,29 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const language = usePreferencesStore((state) => state.language);
+
+  const t = {
+    title: language === 'ar' ? 'كل المنتجات' : 'All Products',
+    intro: language === 'ar'
+      ? 'تسوق منتجات جديدة بأسعار أوتلت. الكميات محدودة والطلب متاح عبر الموقع أو واتساب.'
+      : 'Shop new outlet finds at easy prices. Quantities are limited, and you can order online or through WhatsApp.',
+    search: language === 'ar' ? 'فتش على منتج...' : 'Search items...',
+    newest: language === 'ar' ? 'الأحدث أولاً' : 'Newest First',
+    lowHigh: language === 'ar' ? 'السعر: من الأرخص' : 'Price: Low to High',
+    highLow: language === 'ar' ? 'السعر: من الأغلى' : 'Price: High to Low',
+    loading: language === 'ar' ? 'عم نحمّل المنتجات...' : 'Loading products...',
+    error: language === 'ar' ? 'صار في مشكلة' : 'Something went wrong',
+    retry: language === 'ar' ? 'جرّب مرة تانية' : 'Try Again',
+    none: language === 'ar' ? 'ما لقينا منتجات' : 'No items found',
+    noneCopy: language === 'ar' ? 'جرّب غيّر الفلاتر أو كلمة البحث.' : 'Try adjusting your filters or search terms.',
+    clear: language === 'ar' ? 'امسح الفلاتر' : 'Clear all filters',
+    perPage: language === 'ar' ? 'منتجات بالصفحة:' : 'Items per page:',
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,7 +48,7 @@ const Products = () => {
           category: selectedCategory,
           pageNumber: currentPage,
           pageSize: itemsPerPage,
-          sortBy
+          sortBy,
         });
         setProducts(data.products);
         setTotalPages(data.pages);
@@ -49,7 +65,6 @@ const Products = () => {
     fetchProducts();
   }, [selectedCategory, searchQuery, sortBy, currentPage, itemsPerPage]);
 
-  // Reset to first page when filters or page size changes
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory, searchQuery, sortBy, itemsPerPage]);
@@ -65,197 +80,172 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-vintage-50">
       <Navbar />
-      
-      <main className="container mx-auto px-4 md:px-8 py-12">
-        <header className="mb-12">
-          <h1 className="text-4xl font-serif font-bold text-vintage-900 mb-4">{language === 'ar' ? 'كل المنتجات' : 'All Products'}</h1>
-          <p className="text-vintage-600 max-w-xl">
-            {language === 'ar'
-              ? 'تسوق منتجات جديدة بأسعار أوتلت. الكميات محدودة والطلب متاح عبر الموقع أو واتساب.'
-              : 'Shop new outlet finds at easy prices. Quantities are limited, and you can order online or through WhatsApp.'}
-          </p>
+
+      <main className="mx-auto max-w-7xl px-4 py-12 md:px-8">
+        <header className="mb-10 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-vintage-200 md:p-8">
+          <p className="mb-2 text-sm font-extrabold uppercase text-primary">{language === 'ar' ? 'أوتلت لبنان' : 'Lebanon Outlet'}</p>
+          <h1 className="mb-3 text-4xl font-black text-vintage-900 md:text-5xl">{t.title}</h1>
+          <p className="max-w-2xl text-vintage-700">{t.intro}</p>
         </header>
 
-        {/* Filters & Tools */}
-        <div className="flex flex-col space-y-6 mb-12">
-          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-            {/* Categories */}
-            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
-              {categories.map(cat => (
+        <div className="mb-10 space-y-5">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-black capitalize transition-all ${
+                  selectedCategory === cat
+                    ? 'bg-vintage-900 text-white shadow-lg'
+                    : 'border border-vintage-200 bg-white text-vintage-900 hover:border-primary hover:text-primary'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid gap-4 rounded-3xl border border-vintage-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto_auto] md:items-center">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-vintage-500 rtl:left-auto rtl:right-4" size={18} />
+              <input
+                type="text"
+                placeholder={t.search}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-full border border-vintage-200 bg-vintage-50 py-3 pl-12 pr-4 font-bold outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 rtl:pl-4 rtl:pr-12"
+              />
+            </div>
+
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full appearance-none rounded-full border border-vintage-200 bg-vintage-50 py-3 pl-4 pr-11 text-sm font-black text-vintage-900 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 md:w-56 rtl:pl-11 rtl:pr-4"
+              >
+                <option value="newest">{t.newest}</option>
+                <option value="price-low">{t.lowHigh}</option>
+                <option value="price-high">{t.highLow}</option>
+              </select>
+              <SlidersHorizontal className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-vintage-500 rtl:left-4 rtl:right-auto" size={16} />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-bold text-vintage-700">{t.perPage}</span>
+              {pageSizes.map((size) => (
                 <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap capitalize ${
-                    selectedCategory === cat 
-                      ? 'bg-vintage-900 text-white shadow-md' 
-                      : 'bg-white text-vintage-600 border border-vintage-200 hover:border-primary'
+                  key={size}
+                  onClick={() => setItemsPerPage(size)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-black transition-all ${
+                    itemsPerPage === size
+                      ? 'bg-primary text-white'
+                      : 'border border-vintage-200 bg-white text-vintage-700 hover:border-primary hover:text-primary'
                   }`}
                 >
-                  {cat}
+                  {size}
                 </button>
               ))}
             </div>
-
-            <div className="flex gap-4 w-full md:w-auto">
-              {/* Search */}
-              <div className="relative flex-1 md:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-400" size={18} />
-                <input 
-                  type="text" 
-                  placeholder={language === 'ar' ? 'فتش على منتج...' : 'Search items...'}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-              </div>
-
-              {/* Sort */}
-              <div className="relative">
-                <select 
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-2 bg-white border border-vintage-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-medium text-vintage-700"
-                >
-                  <option value="newest">{language === 'ar' ? 'الأحدث أولاً' : 'Newest First'}</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                </select>
-                <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 text-vintage-400 pointer-events-none" size={16} />
-              </div>
-            </div>
           </div>
 
-          {/* Items Per Page & Stats */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/50 p-4 rounded-2xl border border-vintage-100">
-            <p className="text-sm text-vintage-600">
-              {language === 'ar' ? 'عم نعرض' : 'Showing'} <span className="font-bold text-vintage-900">{indexOfFirstItem + 1}</span> {language === 'ar' ? 'إلى' : 'to'} <span className="font-bold text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> {language === 'ar' ? 'من' : 'of'} <span className="font-bold text-vintage-900">{totalItems}</span> {language === 'ar' ? 'منتج' : 'items'}
-            </p>
-            
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-vintage-600 font-medium">{language === 'ar' ? 'منتجات بالصفحة:' : 'Items per page:'}</label>
-              <div className="flex gap-1">
-                {pageSizes.map(size => (
-                  <button
-                    key={size}
-                    onClick={() => setItemsPerPage(size)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                      itemsPerPage === size
-                        ? 'bg-vintage-900 text-white shadow-sm'
-                        : 'bg-white text-vintage-500 border border-vintage-200 hover:border-primary hover:text-primary'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          <p className="text-sm font-bold text-vintage-700">
+            {language === 'ar' ? 'عم نعرض' : 'Showing'} <span className="text-vintage-900">{indexOfFirstItem + 1}</span> {language === 'ar' ? 'إلى' : 'to'} <span className="text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> {language === 'ar' ? 'من' : 'of'} <span className="text-vintage-900">{totalItems}</span> {language === 'ar' ? 'منتج' : 'items'}
+          </p>
         </div>
 
-        {/* Content Area */}
         {loading ? (
-          <div className="py-24 flex flex-col items-center justify-center text-vintage-400">
-            <Loader2 className="animate-spin mb-4" size={48} />
-            <p className="text-lg font-medium">{language === 'ar' ? 'عم نحمّل المنتجات...' : 'Loading products...'}</p>
+          <div className="flex flex-col items-center justify-center py-24 text-vintage-400">
+            <Loader2 className="mb-4 animate-spin" size={48} />
+            <p className="text-lg font-bold">{t.loading}</p>
           </div>
         ) : error ? (
-          <div className="py-24 flex flex-col items-center justify-center text-red-500 bg-red-50 rounded-2xl border border-red-100 p-8">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-red-100 bg-red-50 p-8 py-24 text-red-500">
             <AlertCircle className="mb-4" size={48} />
-            <h3 className="text-xl font-serif font-bold mb-2">{language === 'ar' ? 'صار في مشكلة' : 'Something went wrong'}</h3>
-            <p className="text-center max-w-md mb-6">{error}</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-8 py-3 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors"
-            >
-              {language === 'ar' ? 'جرّب مرة تانية' : 'Try Again'}
+            <h3 className="mb-2 text-xl font-black">{t.error}</h3>
+            <p className="mb-6 max-w-md text-center">{error}</p>
+            <button onClick={() => window.location.reload()} className="rounded-full bg-red-500 px-8 py-3 font-black text-white transition-colors hover:bg-red-600">
+              {t.retry}
             </button>
           </div>
         ) : products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map(product => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product) => (
               <ProductCard key={product._id || product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="py-24 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-vintage-100 rounded-full text-vintage-400 mb-4">
+          <div className="rounded-3xl bg-white py-24 text-center shadow-sm ring-1 ring-vintage-200">
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-vintage-100 text-primary">
               <Filter size={32} />
             </div>
-            <h3 className="text-xl font-serif font-bold text-vintage-900 mb-2">{language === 'ar' ? 'ما لقينا منتجات' : 'No items found'}</h3>
-            <p className="text-vintage-600">{language === 'ar' ? 'جرّب غيّر الفلاتر أو كلمة البحث.' : 'Try adjusting your filters or search terms.'}</p>
-            <button 
+            <h3 className="mb-2 text-xl font-black text-vintage-900">{t.none}</h3>
+            <p className="text-vintage-700">{t.noneCopy}</p>
+            <button
               onClick={() => { setSelectedCategory('All'); setSearchQuery(''); }}
-              className="mt-6 text-primary font-bold border-b-2 border-primary"
+              className="mt-6 border-b-2 border-primary font-black text-primary"
             >
-              {language === 'ar' ? 'امسح الفلاتر' : 'Clear all filters'}
+              {t.clear}
             </button>
           </div>
         )}
 
-        {/* Pagination UI */}
         {!loading && !error && totalPages > 1 && (
           <div className="mt-16 flex flex-col items-center gap-4">
             <nav className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => paginate(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-vintage-200 text-vintage-700 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={20} className="rtl:rotate-180" />
               </button>
-              
+
               <div className="flex items-center gap-2">
                 {[...Array(totalPages)].map((_, i) => {
                   const pageNum = i + 1;
-                  // Show current page, first, last, and pages around current
-                  if (
-                    pageNum === 1 || 
-                    pageNum === totalPages || 
-                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                  ) {
+
+                  if (pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
                     return (
                       <button
                         key={pageNum}
                         onClick={() => paginate(pageNum)}
-                        className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-all ${
+                        className={`flex h-10 w-10 items-center justify-center rounded-full font-black transition-all ${
                           currentPage === pageNum
-                            ? 'bg-vintage-900 text-white shadow-lg scale-110'
-                            : 'bg-white text-vintage-600 border border-vintage-200 hover:border-primary hover:text-primary'
+                            ? 'scale-110 bg-vintage-900 text-white shadow-lg'
+                            : 'border border-vintage-200 bg-white text-vintage-700 hover:border-primary hover:text-primary'
                         }`}
                       >
                         {pageNum}
                       </button>
                     );
                   }
-                  // Show ellipses
-                  if (
-                    pageNum === currentPage - 2 || 
-                    pageNum === currentPage + 2
-                  ) {
-                    return <span key={pageNum} className="text-vintage-400 font-bold px-1">...</span>;
+
+                  if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                    return <span key={pageNum} className="px-1 font-black text-vintage-400">...</span>;
                   }
+
                   return null;
                 })}
               </div>
 
-              <button 
+              <button
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-vintage-200 text-vintage-600 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-vintage-200 text-vintage-700 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={20} className="rtl:rotate-180" />
               </button>
             </nav>
-            <p className="text-xs text-vintage-400 font-medium">
+            <p className="text-xs font-bold text-vintage-500">
               {language === 'ar' ? 'صفحة' : 'Page'} {currentPage} {language === 'ar' ? 'من' : 'of'} {totalPages}
             </p>
           </div>
         )}
       </main>
 
-      <footer className="bg-white border-t border-vintage-200 py-12 mt-24">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-vintage-400 text-sm">© 2026 Fi Kil Shi. All rights reserved.</p>
+      <footer className="mt-20 border-t border-vintage-200 bg-white py-12">
+        <div className="mx-auto max-w-7xl px-4 text-center">
+          <p className="text-sm font-bold text-vintage-500">© 2026 Fi Kil Shi. All rights reserved.</p>
         </div>
       </footer>
     </div>

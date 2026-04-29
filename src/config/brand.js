@@ -3,8 +3,8 @@ export const BRAND_LOGO = '/logo-wide.png';
 export const BRAND_MARK = '/logo-mark.png';
 
 export const BRAND_TAGLINE = {
-  en: 'Outlet finds for everyday life',
-  ar: 'لقطات أوتلت لكل يوم',
+  en: 'Everything you need',
+  ar: 'كل شي بتحتاجه',
 };
 
 export const WHATSAPP_NUMBER = '96181859091';
@@ -12,7 +12,7 @@ export const WHATSAPP_NUMBER = '96181859091';
 export const SOCIAL_LINKS = {
   facebook: 'https://www.facebook.com/profile.php?id=61589094444866',
   instagram: 'https://www.instagram.com/fikilshi/',
-  tiktok: '#',
+  tiktok: 'https://www.tiktok.com/@fikilshi',
 };
 
 export const SUPPORT_POINTS = {
@@ -26,6 +26,6 @@ export const SUPPORT_POINTS = {
     delivery: 'توصيل أرامكس على كل لبنان',
     payment: 'دفع عند الاستلام',
     card: 'الدفع بالكرت قريباً',
-    returns: 'ما في إرجاع إلا إذا الغرض وصل غلط أو متضرّر',
+    returns: 'ما في إرجاع إلا إذا الغرض وصل غلط أو متضرر',
   },
 };

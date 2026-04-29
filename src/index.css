@@ -1,49 +1,91 @@
 @import "tailwindcss";
 
 :root {
-  --vintage-bg: #FDFCFB;
-  --vintage-text: #5E4030;
-  --vintage-accent: #8B5CF6;
+  --brand-purple: #24113f;
+  --brand-indigo: #130a2c;
+  --brand-orange: #ff8a16;
+  --brand-pink: #ff2f76;
+  --brand-surface: #fffaf6;
 }
 
 @theme {
-  --color-primary: #8B5CF6;
-  --color-secondary: #10B981;
-  --color-vintage-50: #FDFCFB;
-  --color-vintage-100: #F7F3F0;
-  --color-vintage-200: #EFE6DF;
-  --color-vintage-300: #E2D1C3;
-  --color-vintage-400: #D4BBA6;
-  --color-vintage-500: #C6A489;
-  --color-vintage-600: #B38C6F;
-  --color-vintage-700: #966E55;
-  --color-vintage-800: #7A5641;
-  --color-vintage-900: #5E4030;
+  --color-primary: #ff4b5f;
+  --color-secondary: #ff9f1c;
+  --color-vintage-50: #fffaf6;
+  --color-vintage-100: #fff1e5;
+  --color-vintage-200: #ffe0ca;
+  --color-vintage-300: #ffc49b;
+  --color-vintage-400: #ff9f5a;
+  --color-vintage-500: #ff7a2f;
+  --color-vintage-600: #ef4f3f;
+  --color-vintage-700: #a52f62;
+  --color-vintage-800: #4a1f59;
+  --color-vintage-900: #24113f;
   
   --font-sans: "Inter", "system-ui", "sans-serif";
-  --font-serif: "Playfair Display", "serif";
+  --font-serif: "Inter", "system-ui", "sans-serif";
 }
 
 @layer base {
   body {
     @apply bg-vintage-50 text-vintage-900 font-sans;
+    letter-spacing: 0;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-sans font-extrabold;
+    letter-spacing: 0;
+  }
+
+  [dir="rtl"] body {
+    text-align: right;
   }
 }
 
 @layer components {
   .vintage-glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
+    @apply bg-white/90 backdrop-blur-md border-b border-vintage-200 shadow-sm;
   }
 
   .vintage-button {
-    @apply px-6 py-2 bg-vintage-800 text-white rounded-full hover:bg-vintage-700 transition-colors duration-300;
+    @apply px-6 py-2 text-white rounded-full transition-all duration-300;
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-pink) 56%, var(--brand-purple));
+    box-shadow: 0 16px 36px rgba(255, 75, 95, 0.22);
+  }
+
+  .vintage-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 42px rgba(255, 75, 95, 0.3);
   }
 
   .vintage-card {
-    @apply bg-white border border-vintage-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300;
+    @apply bg-white border border-vintage-200 rounded-xl overflow-hidden transition-all duration-300;
+    box-shadow: 0 14px 34px rgba(36, 17, 63, 0.08);
+  }
+
+  .vintage-card:hover {
+    box-shadow: 0 18px 45px rgba(36, 17, 63, 0.14);
+  }
+
+  .brand-gradient-text {
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-pink), var(--brand-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .brand-dark-section {
+    background:
+      radial-gradient(circle at 14% 20%, rgba(255, 138, 22, 0.24), transparent 30%),
+      radial-gradient(circle at 84% 8%, rgba(255, 47, 118, 0.2), transparent 28%),
+      linear-gradient(135deg, #140a2d, #24113f 58%, #351454);
+  }
+
+  .brand-chip {
+    @apply rounded-full border border-vintage-200 bg-white px-4 py-2 text-sm font-bold text-vintage-900 transition-all;
+  }
+
+  .brand-chip:hover {
+    @apply border-primary text-primary;
   }
 }
