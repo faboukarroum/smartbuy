@@ -4,7 +4,7 @@ import { ArrowRight, AlertCircle, Loader2, PackageCheck, Shuffle, Truck, Wallet 
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
-import { BRAND_NAME, BRAND_TAGLINE, SOCIAL_LINKS, SUPPORT_POINTS } from '../config/brand';
+import { BRAND_LOGO, BRAND_NAME, BRAND_TAGLINE, SOCIAL_LINKS, SUPPORT_POINTS } from '../config/brand';
 import usePreferencesStore from '../store/preferencesStore';
 
 const Home = () => {
@@ -68,9 +68,9 @@ const Home = () => {
             <h3 className="text-primary font-bold uppercase tracking-widest text-sm mb-4">
               {t.eyebrow}
             </h3>
+            <img src={BRAND_LOGO} alt={BRAND_NAME} className="mb-6 w-full max-w-xl rounded-lg object-contain" />
             <h1 className="text-4xl md:text-6xl font-serif font-bold text-vintage-900 leading-tight mb-5">
-              {BRAND_NAME}
-              <span className="block text-primary italic">{BRAND_TAGLINE[language]}</span>
+              {BRAND_TAGLINE[language]}
             </h1>
             <p className="text-2xl md:text-3xl font-serif font-bold text-vintage-900 mb-4">
               {t.headline}
@@ -179,7 +179,7 @@ const Home = () => {
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="col-span-1 md:col-span-2">
-              <h2 className="text-3xl font-serif font-bold mb-6">{BRAND_NAME}</h2>
+              <img src={BRAND_LOGO} alt={BRAND_NAME} className="mb-6 h-20 w-auto max-w-xs rounded-lg object-contain" />
               <p className="text-vintage-400 max-w-md leading-relaxed">
                 {language === 'ar'
                   ? 'أوتلت لبناني لأغراض جديدة، أسعار خفيفة، وكميات محدودة.'

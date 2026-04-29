@@ -1,4 +1,6 @@
 export const BRAND_NAME = 'Fi Kil Shi';
+export const BRAND_LOGO = '/logo-wide.png';
+export const BRAND_MARK = '/logo-mark.png';
 
 export const BRAND_TAGLINE = {
   en: 'Outlet finds for everyday life',

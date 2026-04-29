@@ -4,7 +4,7 @@ import { ShoppingCart, User, Search, Menu, X } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import usePreferencesStore from '../store/preferencesStore';
-import { BRAND_NAME } from '../config/brand';
+import { BRAND_LOGO, BRAND_NAME } from '../config/brand';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -17,8 +17,8 @@ const Navbar = () => {
     <nav className="vintage-glass sticky top-0 z-50 px-4 py-3 md:px-8">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="text-2xl font-serif font-bold text-vintage-900 tracking-tighter">
-          {BRAND_NAME.split(' ').slice(0, 2).join(' ')}<span className="text-primary"> Shi</span>
+        <Link to="/" className="flex items-center" aria-label={`${BRAND_NAME} home`}>
+          <img src={BRAND_LOGO} alt={BRAND_NAME} className="h-12 w-auto max-w-[180px] object-contain" />
         </Link>
 
         {/* Desktop Navigation */}

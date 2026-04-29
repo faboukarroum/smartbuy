@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import { getOrders, getProducts, getUsers } from '../api/products';
-import { BRAND_NAME } from '../config/brand';
+import { BRAND_LOGO, BRAND_MARK, BRAND_NAME } from '../config/brand';
 
 const formatRelativeDate = (value) => {
   if (!value) {
@@ -299,12 +299,13 @@ const AdminLayout = () => {
       >
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
-            <Link to="/" className="text-xl font-serif font-bold text-white tracking-tighter flex items-center gap-2">
-              {BRAND_NAME} Admin
+            <Link to="/" className="flex items-center gap-3">
+              <img src={BRAND_LOGO} alt={BRAND_NAME} className="h-12 w-auto max-w-[150px] object-contain" />
+              <span className="text-sm font-bold uppercase tracking-widest text-white/80">Admin</span>
             </Link>
           ) : (
             <div className="w-full flex justify-center">
-              <span className="text-primary font-serif font-bold italic text-2xl">F</span>
+              <img src={BRAND_MARK} alt={BRAND_NAME} className="h-10 w-10 rounded-full object-cover" />
             </div>
           )}
           <button
@@ -370,8 +371,8 @@ const AdminLayout = () => {
               <Menu size={20} />
             </button>
             <div className="md:hidden">
-               <Link to="/" className="text-xl font-serif font-bold text-vintage-900 tracking-tighter">
-                {BRAND_NAME}
+               <Link to="/" className="flex items-center">
+                <img src={BRAND_LOGO} alt={BRAND_NAME} className="h-10 w-auto max-w-[140px] object-contain" />
               </Link>
             </div>
             <form onSubmit={handleHeaderSearchSubmit} className="hidden lg:flex items-center bg-slate-100 rounded-full px-4 py-2 w-64 ml-4">
