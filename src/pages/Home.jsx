@@ -4,7 +4,7 @@ import { ArrowRight, AlertCircle, Loader2, PackageCheck, Shuffle, Truck, Wallet 
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
-import { BRAND_NAME, BRAND_TAGLINE, SOCIAL_LINKS, SUPPORT_POINTS } from '../config/brand';
+import { BRAND_NAME, SOCIAL_LINKS, SUPPORT_POINTS } from '../config/brand';
 import usePreferencesStore from '../store/preferencesStore';
 
 const Home = () => {
@@ -16,13 +16,11 @@ const Home = () => {
   const support = SUPPORT_POINTS[language];
 
   const t = {
-    eyebrow: language === 'ar' ? 'أوتلت الحي' : 'Neighborhood Outlet',
-    headline: language === 'ar' ? 'لقطات جديدة، كميات محدودة، وأسعار خفيفة.' : 'Fresh finds, limited stock, easy prices.',
-    intro: language === 'ar'
-      ? 'منتجات جديدة للبيت، الألعاب، الأدوات، الديكور، وأكثر. اطلب من الموقع أو واتساب والدفع عند الاستلام.'
-      : 'New home goods, toys, tools, decor, and useful everyday finds. Order online or on WhatsApp with cash on delivery.',
-    shop: language === 'ar' ? 'تسوق المنتجات' : 'Shop Products',
-    whatsapp: language === 'ar' ? 'اطلب عبر واتساب' : 'Order on WhatsApp',
+    heroBrand: language === 'ar' ? 'Fikilshi' : 'Fikilshi',
+    heroLine: language === 'ar' ? 'كل شي. أرخص مما تتوقع.' : 'Everything. Cheaper than you expect.',
+    shopDeals: language === 'ar' ? 'تسوق العروض' : 'Shop Deals',
+    daily: language === 'ar' ? 'منتجات جديدة يومياً' : 'New items daily',
+    weekly: language === 'ar' ? 'عروض جديدة كل أسبوع' : 'New deals every week',
     newArrivals: language === 'ar' ? 'وصل حديثاً' : 'New Drops',
     randomFinds: language === 'ar' ? 'لقطات عشوائية' : 'Random Picks',
     viewAll: language === 'ar' ? 'شوف كل المنتجات' : 'View All Products',
@@ -63,43 +61,21 @@ const Home = () => {
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
-          <div className="max-w-3xl">
-            <p className="mb-4 inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-secondary ring-1 ring-white/15">
-              {t.eyebrow}
-            </p>
-            <h1 className="mb-5 max-w-3xl text-5xl font-black leading-tight md:text-7xl">
-              {BRAND_TAGLINE[language]}
+        <div className="relative mx-auto max-w-7xl px-4 py-16 md:px-8 lg:py-20">
+          <div className="max-w-4xl">
+            <h1 className="mb-4 text-5xl font-black leading-tight md:text-7xl">
+              {t.heroBrand}
             </h1>
-            <p className="mb-4 text-2xl font-extrabold text-white/90 md:text-3xl">
-              {t.headline}
+            <p className="mb-8 max-w-3xl text-3xl font-black leading-tight text-white/90 md:text-5xl">
+              {t.heroLine}
             </p>
-            <p className="mb-8 max-w-2xl text-lg leading-relaxed text-white/75">
-              {t.intro}
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/products" className="vintage-button !px-8 !py-4 text-lg font-extrabold flex items-center group">
-                {t.shop}
-                <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
-              </Link>
-              <a href="https://wa.me/96181859091" className="rounded-full border border-white/20 bg-white/10 px-8 py-4 text-lg font-extrabold text-white transition-colors hover:bg-white/20">
-                {t.whatsapp}
-              </a>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl bg-white p-6 text-vintage-900 shadow-2xl shadow-black/20">
-              <p className="text-sm font-extrabold uppercase text-primary">{language === 'ar' ? 'دفع' : 'Payment'}</p>
-              <p className="mt-2 text-3xl font-black">{support.payment}</p>
-            </div>
-            <div className="rounded-3xl bg-white/12 p-6 text-white ring-1 ring-white/20">
-              <p className="text-sm font-extrabold uppercase text-secondary">{language === 'ar' ? 'توصيل' : 'Delivery'}</p>
-              <p className="mt-2 text-3xl font-black">{support.delivery}</p>
-            </div>
-            <div className="rounded-3xl bg-white/12 p-6 text-white ring-1 ring-white/20 sm:col-span-2">
-              <p className="text-sm font-extrabold uppercase text-secondary">{language === 'ar' ? 'الأهم' : 'Heads up'}</p>
-              <p className="mt-2 text-3xl font-black">{language === 'ar' ? 'الكميات محدودة وبتخلص بسرعة' : 'Limited quantities move fast'}</p>
+            <Link to="/products" className="vintage-button inline-flex items-center !px-8 !py-4 text-lg font-extrabold group">
+              {t.shopDeals}
+              <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
+            </Link>
+            <div className="mt-8 grid max-w-xl grid-cols-1 gap-3 text-lg font-extrabold text-white/85 sm:grid-cols-2">
+              <p>{t.daily}</p>
+              <p>{t.weekly}</p>
             </div>
           </div>
         </div>
