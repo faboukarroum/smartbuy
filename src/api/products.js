@@ -95,6 +95,16 @@ export const getUsers = () => {
   return axios.get(`${BASE}/users`, config);
 };
 
+export const getUserProfile = () => {
+  const config = getAuthConfig();
+  return axios.get(`${BASE}/users/profile`, config);
+};
+
+export const updateUserProfile = (data) => {
+  const config = getAuthConfig();
+  return axios.put(`${BASE}/users/profile`, data, config);
+};
+
 export const updateUser = (id, data) => {
   const config = getAuthConfig();
   return axios.put(`${BASE}/users/${id}`, data, config);

@@ -1,15 +1,54 @@
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { AlertCircle, Loader2, Package, ShoppingBag, User } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, Package, Save, ShoppingBag, User } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useAuthStore from '../store/authStore';
-import { getMyOrders } from '../api/products';
+import { getMyOrders, getUserProfile, updateUserProfile } from '../api/products';
 
 const Profile = () => {
-  const { user } = useAuthStore();
+  const { user, login } = useAuthStore();
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(Boolean(user));
   const [error, setError] = React.useState('');
+  const [profileForm, setProfileForm] = React.useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    password: '',
+  });
+  const [profileLoading, setProfileLoading] = React.useState(Boolean(user));
+  const [profileSaving, setProfileSaving] = React.useState(false);
+  const [profileError, setProfileError] = React.useState('');
+  const [profileNotice, setProfileNotice] = React.useState('');
+
+  React.useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        setProfileLoading(true);
+        const { data } = await getUserProfile();
+        setProfileForm({
+          name: data.name || '',
+          email: data.email || '',
+          password: '',
+        });
+        setProfileError('');
+      } catch {
+        setProfileForm({
+          name: user.name || '',
+          email: user.email || '',
+          password: '',
+        });
+        setProfileError('Profile details could not be refreshed. You can still edit your saved account details.');
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   React.useEffect(() => {
     if (!user) {
@@ -32,6 +71,49 @@ const Profile = () => {
     fetchOrders();
   }, [user]);
 
+  const handleProfileChange = (event) => {
+    const { name, value } = event.target;
+    setProfileForm((current) => ({ ...current, [name]: value }));
+    setProfileNotice('');
+  };
+
+  const handleProfileSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!profileForm.name.trim() || !profileForm.email.trim()) {
+      setProfileError('Name and email are required.');
+      return;
+    }
+
+    try {
+      setProfileSaving(true);
+      setProfileError('');
+      setProfileNotice('');
+
+      const payload = {
+        name: profileForm.name.trim(),
+        email: profileForm.email.trim(),
+      };
+
+      if (profileForm.password.trim()) {
+        payload.password = profileForm.password;
+      }
+
+      const { data } = await updateUserProfile(payload);
+      login(data);
+      setProfileForm({
+        name: data.name || '',
+        email: data.email || '',
+        password: '',
+      });
+      setProfileNotice('Profile updated successfully.');
+    } catch (err) {
+      setProfileError(err.response?.data?.message || 'Unable to update profile right now.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -52,6 +134,78 @@ const Profile = () => {
             </div>
           </div>
         </div>
+
+        <section className="mb-8 rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-2xl font-black text-vintage-900">Profile Details</h2>
+            <p className="text-sm text-vintage-600">Update your account information and password.</p>
+          </div>
+
+          {profileNotice && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
+              <CheckCircle2 size={18} />
+              {profileNotice}
+            </div>
+          )}
+
+          {profileError && (
+            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800">
+              <AlertCircle size={18} />
+              {profileError}
+            </div>
+          )}
+
+          {profileLoading ? (
+            <div className="flex items-center gap-3 py-6 text-vintage-500">
+              <Loader2 className="animate-spin" size={22} />
+              <span className="font-bold">Loading profile...</span>
+            </div>
+          ) : (
+            <form onSubmit={handleProfileSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-vintage-700">Full Name</label>
+                <input
+                  name="name"
+                  value={profileForm.name}
+                  onChange={handleProfileChange}
+                  className="w-full rounded-xl border border-vintage-200 bg-vintage-50 px-4 py-3 font-medium outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-bold text-vintage-700">Email Address</label>
+                <input
+                  name="email"
+                  type="email"
+                  value={profileForm.email}
+                  onChange={handleProfileChange}
+                  className="w-full rounded-xl border border-vintage-200 bg-vintage-50 px-4 py-3 font-medium outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-bold text-vintage-700">New Password</label>
+                <input
+                  name="password"
+                  type="password"
+                  value={profileForm.password}
+                  onChange={handleProfileChange}
+                  placeholder="Leave blank to keep your current password"
+                  className="w-full rounded-xl border border-vintage-200 bg-vintage-50 px-4 py-3 font-medium outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                <p className="mt-2 text-xs font-medium text-vintage-500">Only enter a password when you want to change it.</p>
+              </div>
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  disabled={profileSaving}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-vintage-900 px-6 py-3 text-sm font-black text-white transition-colors hover:bg-vintage-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {profileSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                  Save Profile
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
 
         <section className="rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
           <div className="mb-6 flex items-center justify-between gap-4">
