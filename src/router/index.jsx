@@ -23,7 +23,7 @@ const router = createBrowserRouter([
   { path: '/checkout', element: <Checkout /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
-  { path: '/profile', element: <Profile /> },
+  { path: '/profile', element: <ProtectedRoute requireAdmin={false}><Profile /></ProtectedRoute> },
   {
     path: '/admin',
     element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
