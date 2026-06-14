@@ -21,6 +21,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -49,7 +50,9 @@ const Orders = () => {
     if (window.confirm('Mark this order as delivered?')) {
       try {
         await updateOrderToDelivered(id);
-        fetchOrders();
+        const { data } = await getOrders();
+        setOrders(data);
+        setSelectedOrder((current) => data.find((order) => order._id === current?._id) || current);
       } catch {
         alert('Failed to update order status');
       }
@@ -186,6 +189,7 @@ const Orders = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
+                          onClick={() => setSelectedOrder(order)}
                           className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                           title="View Details"
                         >
@@ -212,6 +216,149 @@ const Orders = () => {
           )}
         </div>
       </div>
+
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Order Details</p>
+                <h2 className="mt-1 text-2xl font-bold text-slate-900">#{selectedOrder._id?.slice(-8)}</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Placed {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : 'date unavailable'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedOrder(null)}
+                className="rounded-lg px-3 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="max-h-[calc(90vh-96px)] overflow-y-auto p-6">
+              <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl bg-amber-50 px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Payment</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{selectedOrder.isPaid ? 'Paid' : 'Pending COD'}</p>
+                </div>
+                <div className="rounded-xl bg-blue-50 px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">Delivery</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{selectedOrder.isDelivered ? 'Delivered' : 'Awaiting delivery'}</p>
+                </div>
+                <div className="rounded-xl bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Method</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{selectedOrder.paymentMethod || 'Cash on Delivery'}</p>
+                </div>
+                <div className="rounded-xl bg-emerald-50 px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Total</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">${Number(selectedOrder.totalPrice || 0).toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <section className="rounded-2xl border border-slate-200 p-5">
+                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Customer</h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="font-bold text-slate-900">
+                        {selectedOrder.user?.name || selectedOrder.guestCustomer?.fullName || selectedOrder.shippingAddress?.fullName || 'Guest Customer'}
+                      </p>
+                      <p className="text-slate-500">{selectedOrder.user?.email || selectedOrder.guestCustomer?.email || 'No email provided'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Phone</p>
+                      <p className="font-medium text-slate-700">{selectedOrder.guestCustomer?.phone || 'No phone provided'}</p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-slate-200 p-5">
+                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Delivery</h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Address</p>
+                      <p className="font-medium text-slate-700">{selectedOrder.shippingAddress?.address || 'No address provided'}</p>
+                      <p className="font-medium text-slate-700">{selectedOrder.shippingAddress?.city || 'No city provided'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Delivery Note</p>
+                      <p className="whitespace-pre-wrap font-medium text-slate-700">
+                        {selectedOrder.shippingAddress?.deliveryNote || 'No delivery note provided'}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <section className="mt-6 rounded-2xl border border-slate-200">
+                <div className="border-b border-slate-100 px-5 py-4">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Items</h3>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {(selectedOrder.orderItems || []).map((item) => (
+                    <div key={item.product || item.name} className="flex items-center gap-4 px-5 py-4">
+                      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-400">No img</div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-slate-900">{item.name}</p>
+                        <p className="text-xs text-slate-500">Qty {item.qty} x ${Number(item.price || 0).toFixed(2)}</p>
+                      </div>
+                      <p className="text-sm font-bold text-slate-900">${Number((item.price || 0) * (item.qty || 0)).toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_18rem]">
+                <div className="rounded-2xl border border-slate-200 p-5">
+                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Timeline</h3>
+                  <div className="space-y-3 text-sm text-slate-600">
+                    <p>Created: {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : 'Unknown'}</p>
+                    <p>Paid: {selectedOrder.isPaid && selectedOrder.paidAt ? new Date(selectedOrder.paidAt).toLocaleString() : 'Not collected yet'}</p>
+                    <p>Delivered: {selectedOrder.isDelivered && selectedOrder.deliveredAt ? new Date(selectedOrder.deliveredAt).toLocaleString() : 'Not delivered yet'}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 p-5">
+                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Totals</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Items</span>
+                      <span className="font-bold text-slate-900">${Number(selectedOrder.itemsPrice || 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Delivery</span>
+                      <span className="font-bold text-slate-900">${Number(selectedOrder.shippingPrice || 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between border-t border-slate-100 pt-3 text-base">
+                      <span className="font-bold text-slate-900">Total</span>
+                      <span className="font-bold text-slate-900">${Number(selectedOrder.totalPrice || 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {!selectedOrder.isDelivered && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeliver(selectedOrder._id)}
+                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700"
+                    >
+                      <Truck size={16} />
+                      Mark Delivered
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
