@@ -81,8 +81,20 @@ export const loginUser = (email, password) => {
   return axios.post(`${API_BASE_URL}/users/login`, { email, password });
 };
 
+export const loginWithGoogle = (credential) => {
+  return axios.post(`${API_BASE_URL}/users/google`, { credential });
+};
+
 export const registerUser = (name, email, password) => {
   return axios.post(`${API_BASE_URL}/users`, { name, email, password });
+};
+
+export const requestPasswordReset = (email) => {
+  return axios.post(`${API_BASE_URL}/users/forgot-password`, { email });
+};
+
+export const resetPassword = (token, password) => {
+  return axios.put(`${API_BASE_URL}/users/reset-password/${token}`, { password });
 };
 
 export const getUsers = () => {

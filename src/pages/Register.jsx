@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import Navbar from '../components/Navbar';
-import { registerUser } from '../api/products';
+import GoogleLoginButton from '../components/GoogleLoginButton';
+import { registerUser, loginWithGoogle } from '../api/products';
 import { BRAND_NAME } from '../config/brand';
 import usePreferencesStore from '../store/preferencesStore';
 
@@ -33,8 +34,11 @@ const Register = () => {
     confirmRequired: language === 'ar' ? 'أكد كلمة السر' : 'Please confirm your password',
     mismatch: language === 'ar' ? 'كلمتا السر مش متطابقين' : 'Passwords do not match',
     failed: language === 'ar' ? 'ما قدرنا نعمل الحساب. جرّب مرة تانية.' : 'Failed to create account. Please try again.',
+    googleError: language === 'ar' ? 'ما قدرنا نكمل عبر Google.' : 'Unable to continue with Google.',
     creating: language === 'ar' ? 'عم ننشئ الحساب...' : 'Creating Account...',
     create: language === 'ar' ? 'إنشاء حساب' : 'Create Account',
+    or: language === 'ar' ? 'أو كمل عبر' : 'Or continue with',
+    googleSetup: language === 'ar' ? 'Google بحاجة إعداد' : 'Google setup pending',
     already: language === 'ar' ? 'عندك حساب؟' : 'Already have an account?',
     signIn: language === 'ar' ? 'تسجيل الدخول' : 'Sign in',
   };
@@ -49,6 +53,21 @@ const Register = () => {
     } catch (err) {
       console.error('Registration error:', err);
       setApiError(err.response?.data?.message || t.failed);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleCredential = async (credential) => {
+    try {
+      setLoading(true);
+      setApiError(null);
+      const response = await loginWithGoogle(credential);
+      login(response.data);
+      navigate('/');
+    } catch (err) {
+      console.error('Google registration error:', err);
+      setApiError(err.response?.data?.message || t.googleError);
     } finally {
       setLoading(false);
     }
@@ -163,6 +182,17 @@ const Register = () => {
                   )}
                 </button>
               </form>
+
+              <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-vintage-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-4 text-vintage-400">{t.or}</span>
+                </div>
+              </div>
+
+              <GoogleLoginButton label={t.googleSetup} onCredential={handleGoogleCredential} disabled={loading} />
             </div>
 
             <div className="border-t border-vintage-200 bg-vintage-50 p-6 text-center">
