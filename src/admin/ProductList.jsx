@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Plus, 
@@ -30,7 +30,7 @@ const ProductList = () => {
     setSearchQuery(searchParams.get('q') || '');
   }, [searchParams]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await getProducts({ 
@@ -48,11 +48,11 @@ const ProductList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchTerm]);
 
   useEffect(() => {
     fetchProducts();
-  }, [page, searchTerm]);
+  }, [fetchProducts]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {

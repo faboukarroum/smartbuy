@@ -44,6 +44,8 @@ const ProductDetail = () => {
   const galleryImages = allImages.length > 0 ? allImages : [getProductFallbackImage(product)];
   const displayPrice = product ? getDisplayPrice(product, currency) : null;
   const stock = Number(product?.stock);
+  const isOutOfStock = Number.isFinite(stock) && stock <= 0;
+  const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
   const support = SUPPORT_POINTS[language];
 
   const nextImage = () => {
@@ -212,19 +214,20 @@ const ProductDetail = () => {
                   </button>
                   <span className="w-12 text-center font-medium text-vintage-900">{quantity}</span>
                   <button 
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 flex items-center justify-center text-vintage-600 hover:text-primary"
+                    onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
+                    disabled={quantity >= maxQty}
+                    className="w-10 h-10 flex items-center justify-center text-vintage-600 hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     +
                   </button>
                 </div>
                 <button 
                   onClick={() => addToCart({ ...product, quantity })}
-                  disabled={product.stock === 0}
+                  disabled={isOutOfStock}
                   className="flex-1 vintage-button !py-4 flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ShoppingCart size={20} />
-                  {language === 'ar' ? 'أضف للسلة' : 'Add to Cart'}
+                  {isOutOfStock ? 'Out of Stock' : (language === 'ar' ? 'أضف للسلة' : 'Add to Cart')}
                 </button>
                 <a
                   href={getProductWhatsAppUrl(product, currency, language)}

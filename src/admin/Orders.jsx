@@ -58,7 +58,9 @@ const Orders = () => {
 
   const filteredOrders = orders.filter(order => 
     order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.user?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.guestCustomer?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.guestCustomer?.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -139,8 +141,11 @@ const Orders = () => {
                         <div className="h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 text-xs font-bold">
                           {order.user?.name?.[0] || 'U'}
                         </div>
-                        <span className="text-sm font-medium text-slate-700">{order.user?.name || 'Deleted User'}</span>
+                        <span className="text-sm font-medium text-slate-700">{order.user?.name || order.guestCustomer?.fullName || 'Guest Customer'}</span>
                       </div>
+                      {order.guestCustomer?.phone && (
+                        <p className="mt-1 text-xs text-slate-400">{order.guestCustomer.phone}</p>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm font-bold text-slate-900">${order.totalPrice.toFixed(2)}</p>
@@ -158,7 +163,7 @@ const Orders = () => {
                         </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase">
-                          <Clock size={12} /> Pending
+                          <Clock size={12} /> Pending COD
                         </span>
                       )}
                     </td>
@@ -174,7 +179,7 @@ const Orders = () => {
                         </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 uppercase">
-                          <Clock size={12} /> In Transit
+                          <Clock size={12} /> Awaiting delivery
                         </span>
                       )}
                     </td>
@@ -186,7 +191,7 @@ const Orders = () => {
                         >
                           <Eye size={18} />
                         </button>
-                        {!order.isDelivered && order.isPaid && (
+                        {!order.isDelivered && (
                           <button 
                             onClick={() => handleDeliver(order._id)}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

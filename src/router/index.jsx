@@ -6,6 +6,7 @@ import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
+import Profile from '../pages/Profile'
 import AdminLayout from '../admin/AdminLayout'
 import Dashboard from '../admin/Dashboard'
 import ProductList from '../admin/ProductList'
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
   { path: '/checkout', element: <Checkout /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
+  { path: '/profile', element: <Profile /> },
   {
     path: '/admin',
     element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,

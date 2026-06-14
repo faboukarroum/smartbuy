@@ -159,32 +159,32 @@ const AdminLayout = () => {
         const usersData = usersResult.status === 'fulfilled' ? usersResult.value.data : [];
         const users = Array.isArray(usersData) ? usersData : usersData?.users || [];
 
-        const pendingOrders = orders.filter((order) => !order.isPaid);
-        const processingOrders = orders.filter((order) => order.isPaid && !order.isDelivered);
+        const pendingCodOrders = orders.filter((order) => !order.isPaid && !order.isDelivered);
+        const fulfillmentOrders = orders.filter((order) => !order.isDelivered);
         const lowStockProducts = products.filter((product) => typeof product.stock === 'number' && product.stock > 0 && product.stock <= 5);
         const outOfStockProducts = products.filter((product) => product.stock === 0);
 
         const nextItems = [];
 
-        if (pendingOrders.length > 0) {
+        if (pendingCodOrders.length > 0) {
           nextItems.push({
             id: 'pending-orders',
             icon: <AlertCircle size={16} className="text-amber-600" />,
-            title: `${pendingOrders.length} payment${pendingOrders.length === 1 ? '' : 's'} pending`,
-            description: 'Customer orders are waiting for payment confirmation.',
-            time: pendingOrders[0]?.createdAt ? formatRelativeDate(pendingOrders[0].createdAt) : 'Needs attention',
+            title: `${pendingCodOrders.length} COD order${pendingCodOrders.length === 1 ? '' : 's'} pending`,
+            description: 'Cash-on-delivery orders are waiting for delivery.',
+            time: pendingCodOrders[0]?.createdAt ? formatRelativeDate(pendingCodOrders[0].createdAt) : 'Needs attention',
             to: '/admin/orders',
             tone: 'bg-amber-50',
           });
         }
 
-        if (processingOrders.length > 0) {
+        if (fulfillmentOrders.length > 0) {
           nextItems.push({
             id: 'processing-orders',
             icon: <Truck size={16} className="text-blue-600" />,
-            title: `${processingOrders.length} order${processingOrders.length === 1 ? '' : 's'} ready to fulfill`,
-            description: 'Paid orders still need delivery updates.',
-            time: processingOrders[0]?.paidAt ? formatRelativeDate(processingOrders[0].paidAt) : 'Needs attention',
+            title: `${fulfillmentOrders.length} order${fulfillmentOrders.length === 1 ? '' : 's'} ready to fulfill`,
+            description: 'Orders still need delivery updates.',
+            time: fulfillmentOrders[0]?.createdAt ? formatRelativeDate(fulfillmentOrders[0].createdAt) : 'Needs attention',
             to: '/admin/orders',
             tone: 'bg-blue-50',
           });

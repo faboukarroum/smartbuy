@@ -47,6 +47,8 @@ const Cart = () => {
               {items.map((item) => {
                 const itemId = item._id || item.id;
                 const linePrice = getLineItemPrice(item, currency);
+                const stock = Number(item.stock);
+                const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
 
                 return (
                   <div key={itemId} className="grid gap-5 rounded-3xl border border-vintage-200 bg-white p-5 shadow-sm sm:grid-cols-[8rem_1fr]">
@@ -69,7 +71,11 @@ const Cart = () => {
                             <Minus size={16} />
                           </button>
                           <span className="w-9 text-center font-black text-vintage-900">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(itemId, item.quantity + 1)} className="flex h-9 w-9 items-center justify-center text-vintage-700 hover:text-primary">
+                          <button
+                            onClick={() => updateQuantity(itemId, Math.min(maxQty, item.quantity + 1))}
+                            disabled={item.quantity >= maxQty}
+                            className="flex h-9 w-9 items-center justify-center text-vintage-700 hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                          >
                             <Plus size={16} />
                           </button>
                         </div>

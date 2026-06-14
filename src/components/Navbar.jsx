@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Search, Menu, X, Truck } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
@@ -8,6 +8,7 @@ import { BRAND_LOGO, BRAND_NAME } from '../config/brand';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const navigate = useNavigate();
   const cartItems = useCartStore((state) => state.items);
   const { user, logout } = useAuthStore();
   const { language, currency, toggleLanguage, toggleCurrency } = usePreferencesStore();
@@ -47,7 +48,11 @@ const Navbar = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <button className="p-2 text-vintage-900 hover:text-primary transition-colors" aria-label="Search products">
+          <button
+            onClick={() => navigate('/products')}
+            className="p-2 text-vintage-900 hover:text-primary transition-colors"
+            aria-label="Search products"
+          >
             <Search size={20} />
           </button>
 
@@ -105,7 +110,11 @@ const Navbar = () => {
           <NavLink to="/products" className="block text-lg font-extrabold text-vintage-900" onClick={() => setIsOpen(false)}>{labels.shop}</NavLink>
           <button onClick={toggleCurrency} className="block text-lg font-extrabold text-vintage-900">{currency}</button>
           <button onClick={toggleLanguage} className="block text-lg font-extrabold text-vintage-900">{language === 'en' ? 'Arabic' : 'English'}</button>
-          <Link to="/login" className="block text-lg font-extrabold text-vintage-900" onClick={() => setIsOpen(false)}>{labels.login}</Link>
+          {user ? (
+            <Link to={user.role === 'admin' ? '/admin' : '/profile'} className="block text-lg font-extrabold text-vintage-900" onClick={() => setIsOpen(false)}>Account</Link>
+          ) : (
+            <Link to="/login" className="block text-lg font-extrabold text-vintage-900" onClick={() => setIsOpen(false)}>{labels.login}</Link>
+          )}
         </div>
       )}
     </nav>

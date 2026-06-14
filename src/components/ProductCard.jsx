@@ -11,6 +11,7 @@ const ProductCard = ({ product }) => {
   const currency = usePreferencesStore((state) => state.currency);
   const displayPrice = getDisplayPrice(product, currency);
   const stock = Number(product.stock);
+  const isOutOfStock = Number.isFinite(stock) && stock <= 0;
   const isLimited = Number.isFinite(stock) && stock > 0 && stock <= 5;
 
   return (
@@ -31,8 +32,10 @@ const ProductCard = ({ product }) => {
             <Eye size={20} />
           </Link>
           <button 
-            onClick={() => addToCart(product)}
-            className="p-3 bg-white text-vintage-900 rounded-full hover:bg-primary hover:text-white transition-colors duration-300 shadow-lg"
+            onClick={() => addToCart({ ...product, quantity: 1 })}
+            disabled={isOutOfStock}
+            className="p-3 bg-white text-vintage-900 rounded-full hover:bg-primary hover:text-white transition-colors duration-300 shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+            title={isOutOfStock ? 'Out of stock' : 'Add to cart'}
           >
             <ShoppingCart size={20} />
           </button>
@@ -46,6 +49,11 @@ const ProductCard = ({ product }) => {
         {isLimited && (
           <span className="absolute right-4 top-4 rounded-full bg-vintage-900 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">
             Only {stock} left
+          </span>
+        )}
+        {isOutOfStock && (
+          <span className="absolute right-4 top-4 rounded-full bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">
+            Out of stock
           </span>
         )}
       </div>

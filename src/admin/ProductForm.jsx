@@ -153,6 +153,8 @@ const ProductForm = () => {
       // Transform field arrays back to strings
       const payload = {
         ...data,
+        price: Number(data.price),
+        stock: Number(data.stock),
         images: data.images.map(img => img.url).filter(url => url.trim() !== ''),
         details: data.details.map(det => det.text).filter(text => text.trim() !== '')
       };

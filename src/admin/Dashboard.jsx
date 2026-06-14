@@ -73,7 +73,7 @@ const getOrderStatus = (order) => {
   }
 
   return {
-    label: 'Pending',
+    label: 'Pending COD',
     className: 'bg-amber-100 text-amber-600',
   };
 };
@@ -110,21 +110,21 @@ const Dashboard = () => {
         const totalRevenue = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
         const paidOrders = orders.filter((order) => order.isPaid);
         const deliveredOrders = orders.filter((order) => order.isDelivered);
-        const pendingOrders = orders.filter((order) => !order.isPaid);
-        const processingOrders = orders.filter((order) => order.isPaid && !order.isDelivered);
+        const pendingCodOrders = orders.filter((order) => !order.isPaid && !order.isDelivered);
+        const fulfillmentOrders = orders.filter((order) => !order.isDelivered);
         const lowStockProducts = products.filter((product) => typeof product.stock === 'number' && product.stock > 0 && product.stock <= 5);
         const outOfStockProducts = products.filter((product) => product.stock === 0);
         const healthyInventoryProducts = products.filter((product) => typeof product.stock === 'number' && product.stock > 0);
         const inventoryHealth = productCount > 0 ? healthyInventoryProducts.length / productCount : 0;
         const paidRate = orders.length > 0 ? paidOrders.length / orders.length : 0;
-        const deliveryRate = paidOrders.length > 0 ? deliveredOrders.length / paidOrders.length : 0;
+        const deliveryRate = orders.length > 0 ? deliveredOrders.length / orders.length : 0;
         const userCount = users.length > 0 ? users.length : (user ? 1 : 0);
         const recentOrders = [...orders]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5)
           .map((order) => ({
             id: `#${order._id?.slice(-8) || 'UNKNOWN'}`,
-            customer: order.user?.name || 'Deleted User',
+            customer: order.user?.name || order.guestCustomer?.fullName || 'Guest Customer',
             date: formatRelativeDate(order.createdAt),
             amount: currencyFormatter.format(order.totalPrice || 0),
             status: getOrderStatus(order),
@@ -140,13 +140,13 @@ const Dashboard = () => {
               label: 'Total Revenue',
               value: currencyFormatter.format(totalRevenue),
               icon: <DollarSign className="text-emerald-500" />,
-              detail: `${paidOrders.length} paid order${paidOrders.length === 1 ? '' : 's'}`,
+              detail: `${orders.length} order${orders.length === 1 ? '' : 's'} total`,
             },
             {
               label: 'Total Orders',
               value: orders.length.toString(),
               icon: <ShoppingBag className="text-blue-500" />,
-              detail: `${pendingOrders.length} awaiting payment`,
+              detail: `${fulfillmentOrders.length} awaiting delivery`,
             },
             {
               label: 'Total Products',
@@ -171,7 +171,7 @@ const Dashboard = () => {
               dot: 'bg-primary',
             },
             {
-              label: 'Payment Completion',
+              label: 'COD Collection',
               value: percentFormatter.format(paidRate),
               width: `${Math.round(paidRate * 100)}%`,
               accent: 'bg-emerald-500',
@@ -189,12 +189,12 @@ const Dashboard = () => {
             {
               icon: <Clock size={16} />,
               className: 'bg-amber-50 text-amber-700',
-              label: `${pendingOrders.length} order${pendingOrders.length === 1 ? '' : 's'} waiting for payment`,
+              label: `${pendingCodOrders.length} COD order${pendingCodOrders.length === 1 ? '' : 's'} awaiting delivery`,
             },
             {
               icon: <Truck size={16} />,
               className: 'bg-blue-50 text-blue-700',
-              label: `${processingOrders.length} paid order${processingOrders.length === 1 ? '' : 's'} still need delivery`,
+              label: `${fulfillmentOrders.length} order${fulfillmentOrders.length === 1 ? '' : 's'} still need delivery`,
             },
             {
               icon: <AlertCircle size={16} />,

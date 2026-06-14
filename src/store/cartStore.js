@@ -8,17 +8,25 @@ const useCartStore = create(
       
       addToCart: (product) => set((state) => {
         const productId = product._id || product.id;
+        const stock = Number(product.stock);
+        const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
+        const requestedQty = Math.max(1, product.quantity || 1);
+
+        if (Number.isFinite(stock) && stock <= 0) {
+          return state;
+        }
+
         const existingItem = state.items.find((item) => (item._id || item.id) === productId);
         if (existingItem) {
           return {
             items: state.items.map((item) =>
               (item._id || item.id) === productId
-                ? { ...item, quantity: item.quantity + (product.quantity || 1) }
+                ? { ...item, ...product, quantity: Math.min(maxQty, item.quantity + requestedQty) }
                 : item
             ),
           };
         }
-        return { items: [...state.items, { ...product, id: productId, quantity: product.quantity || 1 }] };
+        return { items: [...state.items, { ...product, id: productId, quantity: Math.min(maxQty, requestedQty) }] };
       }),
 
       removeFromCart: (productId) => set((state) => ({
@@ -26,9 +34,15 @@ const useCartStore = create(
       })),
 
       updateQuantity: (productId, quantity) => set((state) => ({
-        items: state.items.map((item) =>
-          (item._id || item.id) === productId ? { ...item, quantity } : item
-        ),
+        items: state.items.map((item) => {
+          if ((item._id || item.id) !== productId) {
+            return item;
+          }
+
+          const stock = Number(item.stock);
+          const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
+          return { ...item, quantity: Math.max(1, Math.min(maxQty, quantity)) };
+        }),
       })),
 
       clearCart: () => set({ items: [] }),

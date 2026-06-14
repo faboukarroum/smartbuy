@@ -47,9 +47,19 @@ export const uploadProductImage = (file) => {
 };
 
 // Order API
+export const createOrder = (data) => {
+  const config = getAuthConfig();
+  return axios.post(`${BASE}/orders`, data, config);
+};
+
 export const getOrders = () => {
   const config = getAuthConfig();
   return axios.get(`${BASE}/orders`, config);
+};
+
+export const getMyOrders = () => {
+  const config = getAuthConfig();
+  return axios.get(`${BASE}/orders/myorders`, config);
 };
 
 export const updateOrderToDelivered = (id) => {
@@ -75,9 +85,12 @@ export const getUsers = () => {
 const getAuthConfig = () => {
   const authData = JSON.parse(localStorage.getItem('fikilshi-auth') || localStorage.getItem('smartbuy-auth'));
   const token = authData?.state?.user?.token;
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  };
+
+  return token
+    ? {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    : {};
 };
