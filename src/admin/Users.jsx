@@ -2,88 +2,66 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   AlertCircle,
+  Check,
+  Edit,
   Loader2,
   Mail,
   Search,
   ShieldCheck,
+  Trash2,
   UserRound,
   Users as UsersIcon,
+  X,
 } from 'lucide-react';
-import { getUsers } from '../api/products';
+import { deleteUser, getUsers, updateUser } from '../api/products';
 import useAuthStore from '../store/authStore';
 
-const fallbackUsers = [
-  {
-    _id: 'sample-admin-1',
-    name: 'Fi Kil Shi Admin',
-    email: 'admin@fikilshi.local',
-    role: 'admin',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: 'sample-user-1',
-    name: 'Sarah Walker',
-    email: 'sarah@example.com',
-    role: 'customer',
-    createdAt: '2026-03-21T09:00:00.000Z',
-  },
-  {
-    _id: 'sample-user-2',
-    name: 'Michael Reed',
-    email: 'michael@example.com',
-    role: 'customer',
-    createdAt: '2026-04-03T13:30:00.000Z',
-  },
-];
+const emptyDraft = {
+  name: '',
+  email: '',
+  role: 'user',
+};
 
 const Users = () => {
   const { user } = useAuthStore();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [usingFallback, setUsingFallback] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [draft, setDraft] = useState(emptyDraft);
+  const [savingId, setSavingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     setSearchTerm(searchParams.get('q') || '');
   }, [searchParams]);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const { data } = await getUsers();
-        const userList = Array.isArray(data) ? data : data?.users;
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const { data } = await getUsers();
+      const userList = Array.isArray(data) ? data : data?.users;
 
-        if (!Array.isArray(userList)) {
-          throw new Error('Unexpected users response');
-        }
-
-        setUsers(userList);
-        setError('');
-        setUsingFallback(false);
-      } catch {
-        const adminUser = user
-          ? [{
-              _id: user._id || 'current-admin',
-              name: user.name || 'Admin',
-              email: user.email || 'admin@fikilshi.local',
-              role: user.role || 'admin',
-              createdAt: user.createdAt || new Date().toISOString(),
-            }]
-          : [];
-
-        setUsers(adminUser.length > 0 ? adminUser : fallbackUsers);
-        setUsingFallback(true);
-        setError('Live user records are unavailable right now, so a fallback list is being shown.');
-      } finally {
-        setLoading(false);
+      if (!Array.isArray(userList)) {
+        throw new Error('Unexpected users response');
       }
-    };
 
+      setUsers(userList);
+      setError('');
+    } catch (err) {
+      setUsers([]);
+      setError(err.response?.data?.message || 'Live user records are unavailable right now.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
-  }, [user]);
+  }, []);
 
   const filteredUsers = useMemo(() => {
     const query = searchTerm.toLowerCase();
@@ -96,12 +74,79 @@ const Users = () => {
 
   const adminCount = users.filter((entry) => entry.role === 'admin').length;
 
+  const startEdit = (entry) => {
+    setEditingId(entry._id);
+    setDraft({
+      name: entry.name || '',
+      email: entry.email || '',
+      role: entry.role || 'user',
+    });
+    setNotice('');
+    setError('');
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setDraft(emptyDraft);
+  };
+
+  const handleSave = async (id) => {
+    if (!draft.name.trim() || !draft.email.trim()) {
+      setError('Name and email are required.');
+      return;
+    }
+
+    try {
+      setSavingId(id);
+      const { data } = await updateUser(id, {
+        name: draft.name.trim(),
+        email: draft.email.trim(),
+        role: draft.role,
+      });
+
+      setUsers((current) => current.map((entry) => (entry._id === id ? { ...entry, ...data } : entry)));
+      setEditingId(null);
+      setDraft(emptyDraft);
+      setError('');
+      setNotice('User updated successfully.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update user.');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const handleDelete = async (entry) => {
+    const isSelf = entry._id === user?._id;
+
+    if (isSelf) {
+      setError('You cannot delete your own admin account.');
+      return;
+    }
+
+    if (!window.confirm(`Delete ${entry.name || entry.email}? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeletingId(entry._id);
+      await deleteUser(entry._id);
+      setUsers((current) => current.filter((item) => item._id !== entry._id));
+      setNotice('User deleted successfully.');
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete user.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-2xl font-serif font-bold text-slate-900">Users</h1>
-          <p className="text-sm text-slate-500">Review the people who can access and shop with Fi Kil Shi.</p>
+          <p className="text-sm text-slate-500">Manage account access, roles, and customer records.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -142,16 +187,24 @@ const Users = () => {
               />
             </div>
 
-            {usingFallback && (
-              <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-xs font-bold uppercase tracking-wide text-amber-700">
-                <AlertCircle size={14} />
-                Fallback Data
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={fetchUsers}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-primary hover:text-primary"
+            >
+              Refresh
+            </button>
           </div>
 
+          {notice && (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              {notice}
+            </div>
+          )}
+
           {error && (
-            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <AlertCircle size={18} />
               {error}
             </div>
           )}
@@ -166,7 +219,7 @@ const Users = () => {
           ) : filteredUsers.length === 0 ? (
             <div className="py-20 text-center text-slate-400">
               <UsersIcon size={40} className="mx-auto mb-4 opacity-20" />
-              <p className="font-medium">No users matched your search.</p>
+              <p className="font-medium">{error ? 'No live users loaded.' : 'No users matched your search.'}</p>
             </div>
           ) : (
             <table className="w-full border-collapse text-left">
@@ -176,43 +229,123 @@ const Users = () => {
                   <th className="px-6 py-4">Contact</th>
                   <th className="px-6 py-4">Role</th>
                   <th className="px-6 py-4">Joined</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredUsers.map((entry) => (
-                  <tr key={entry._id} className="transition-colors hover:bg-slate-50/50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
-                          {entry.name?.[0] || 'U'}
+                {filteredUsers.map((entry) => {
+                  const isEditing = editingId === entry._id;
+                  const isSelf = entry._id === user?._id;
+
+                  return (
+                    <tr key={entry._id} className="transition-colors hover:bg-slate-50/50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600">
+                            {entry.name?.[0] || 'U'}
+                          </div>
+                          <div>
+                            {isEditing ? (
+                              <input
+                                value={draft.name}
+                                onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
+                                className="w-48 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900 outline-none focus:border-primary"
+                              />
+                            ) : (
+                              <p className="text-sm font-bold text-slate-900">{entry.name || 'Unknown user'}</p>
+                            )}
+                            <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">
+                              ID: {entry._id?.slice(-6) || 'n/a'} {isSelf ? ' / You' : ''}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900">{entry.name || 'Unknown user'}</p>
-                          <p className="text-xs uppercase tracking-wide text-slate-400">ID: {entry._id?.slice(-6) || 'n/a'}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        {isEditing ? (
+                          <input
+                            value={draft.email}
+                            onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))}
+                            className="w-64 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Mail size={16} className="text-slate-400" />
+                            <span>{entry.email || 'No email available'}</span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {isEditing ? (
+                          <select
+                            value={draft.role}
+                            onChange={(event) => setDraft((current) => ({ ...current, role: event.target.value }))}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-primary"
+                          >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        ) : (
+                          <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                            entry.role === 'admin'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {entry.role === 'admin' ? <ShieldCheck size={12} /> : <UserRound size={12} />}
+                            {entry.role || 'user'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : 'Unknown'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          {isEditing ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleSave(entry._id)}
+                                disabled={savingId === entry._id}
+                                className="rounded-lg p-2 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50"
+                                title="Save user"
+                              >
+                                {savingId === entry._id ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEdit}
+                                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                                title="Cancel edit"
+                              >
+                                <X size={18} />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => startEdit(entry)}
+                                className="rounded-lg p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600"
+                                title="Edit user"
+                              >
+                                <Edit size={18} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(entry)}
+                                disabled={isSelf || deletingId === entry._id}
+                                className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
+                                title={isSelf ? 'You cannot delete yourself' : 'Delete user'}
+                              >
+                                {deletingId === entry._id ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
+                              </button>
+                            </>
+                          )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Mail size={16} className="text-slate-400" />
-                        <span>{entry.email || 'No email available'}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                        entry.role === 'admin'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {entry.role === 'admin' ? <ShieldCheck size={12} /> : <UserRound size={12} />}
-                        {entry.role || 'customer'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">
-                      {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : 'Unknown'}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

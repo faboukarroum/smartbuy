@@ -95,6 +95,16 @@ export const getUsers = () => {
   return axios.get(`${BASE}/users`, config);
 };
 
+export const updateUser = (id, data) => {
+  const config = getAuthConfig();
+  return axios.put(`${BASE}/users/${id}`, data, config);
+};
+
+export const deleteUser = (id) => {
+  const config = getAuthConfig();
+  return axios.delete(`${BASE}/users/${id}`, config);
+};
+
 // Helper for auth headers
 const getAuthConfig = () => {
   const authData = JSON.parse(localStorage.getItem('fikilshi-auth') || localStorage.getItem('smartbuy-auth'));
