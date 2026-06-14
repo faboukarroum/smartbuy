@@ -16,13 +16,13 @@ const Home = () => {
   const support = SUPPORT_POINTS[language];
 
   const t = {
-    heroBrand: language === 'ar' ? 'Fikilshi' : 'Fikilshi',
-    heroLine: language === 'ar' ? 'كل شي. أرخص مما تتوقع.' : 'Everything. Cheaper than you expect.',
+    heroBrand: 'Fikilshi',
+    heroLine: language === 'ar' ? 'كل شي. أرخص مما بتتوقع.' : 'Everything. Cheaper than you expect.',
     shopDeals: language === 'ar' ? 'تسوق العروض' : 'Shop Deals',
     daily: language === 'ar' ? 'منتجات جديدة يومياً' : 'New items daily',
     weekly: language === 'ar' ? 'عروض جديدة كل أسبوع' : 'New deals every week',
-    newArrivals: language === 'ar' ? 'وصل حديثاً' : 'New Drops',
-    randomFinds: language === 'ar' ? 'لقطات عشوائية' : 'Random Picks',
+    newArrivals: language === 'ar' ? 'وصل جديد' : 'New Drops',
+    randomFinds: language === 'ar' ? 'لقطات منوعة' : 'Random Picks',
     viewAll: language === 'ar' ? 'شوف كل المنتجات' : 'View All Products',
     empty: language === 'ar' ? 'ما في منتجات جديدة بعد' : 'No New Arrivals Yet',
     emptyCopy: language === 'ar' ? 'علّم المنتجات كجديدة من لوحة التحكم لتظهر هون.' : 'Mark products as new in the admin panel and they will appear here.',
@@ -69,7 +69,7 @@ const Home = () => {
             <p className="mb-8 max-w-3xl text-3xl font-black leading-tight text-white/90 md:text-5xl">
               {t.heroLine}
             </p>
-            <Link to="/products" className="vintage-button inline-flex items-center !px-8 !py-4 text-lg font-extrabold group">
+            <Link to="/products" className="vintage-button group inline-flex items-center !px-8 !py-4 text-lg font-extrabold">
               {t.shopDeals}
               <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
             </Link>
@@ -86,7 +86,7 @@ const Home = () => {
           {[
             [Truck, language === 'ar' ? 'توصيل لكل لبنان' : 'Lebanon-wide Delivery', support.delivery],
             [Wallet, language === 'ar' ? 'دفع عند الاستلام' : 'Cash on Delivery', support.payment],
-            [PackageCheck, language === 'ar' ? 'كمية محدودة' : 'Limited Stock', language === 'ar' ? 'إذا عجبك شي، لا تطول.' : 'If you like it, grab it.'],
+            [PackageCheck, language === 'ar' ? 'كميات محدودة' : 'Limited Stock', language === 'ar' ? 'إذا عجبك شي، لا تطوّل.' : 'If you like it, grab it.'],
           ].map(([Icon, title, copy]) => (
             <div key={title} className="flex items-center gap-4 rounded-2xl border border-vintage-200 bg-vintage-50 p-5">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
@@ -148,7 +148,7 @@ const Home = () => {
               </div>
               <div>
                 <h2 className="text-3xl font-black text-vintage-900">{t.randomFinds}</h2>
-                <p className="text-vintage-700">{language === 'ar' ? 'اختيارات متنوعة من كل شي.' : 'A rotating mix from every corner of the shop.'}</p>
+                <p className="text-vintage-700">{language === 'ar' ? 'اختيارات منوعة من كل شي.' : 'A rotating mix from every corner of the shop.'}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

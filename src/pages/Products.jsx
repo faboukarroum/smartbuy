@@ -24,9 +24,9 @@ const Products = () => {
   const t = {
     title: language === 'ar' ? 'كل المنتجات' : 'All Products',
     intro: language === 'ar'
-      ? 'تسوق منتجات جديدة بأسعار أوتلت. الكميات محدودة والطلب متاح عبر الموقع أو واتساب.'
+      ? 'تسوق منتجات جديدة بأسعار أوتلت. الكميات محدودة، والطلب متاح عبر الموقع أو واتساب.'
       : 'Shop new outlet finds at easy prices. Quantities are limited, and you can order online or through WhatsApp.',
-    search: language === 'ar' ? 'فتش على منتج...' : 'Search items...',
+    search: language === 'ar' ? 'فتّش على منتج...' : 'Search items...',
     newest: language === 'ar' ? 'الأحدث أولاً' : 'Newest First',
     lowHigh: language === 'ar' ? 'السعر: من الأرخص' : 'Price: Low to High',
     highLow: language === 'ar' ? 'السعر: من الأغلى' : 'Price: High to Low',
@@ -34,9 +34,14 @@ const Products = () => {
     error: language === 'ar' ? 'صار في مشكلة' : 'Something went wrong',
     retry: language === 'ar' ? 'جرّب مرة تانية' : 'Try Again',
     none: language === 'ar' ? 'ما لقينا منتجات' : 'No items found',
-    noneCopy: language === 'ar' ? 'جرّب غيّر الفلاتر أو كلمة البحث.' : 'Try adjusting your filters or search terms.',
+    noneCopy: language === 'ar' ? 'جرّب تغيّر الفلاتر أو كلمة البحث.' : 'Try adjusting your filters or search terms.',
     clear: language === 'ar' ? 'امسح الفلاتر' : 'Clear all filters',
     perPage: language === 'ar' ? 'منتجات بالصفحة:' : 'Items per page:',
+    showing: language === 'ar' ? 'عم نعرض' : 'Showing',
+    to: language === 'ar' ? 'إلى' : 'to',
+    of: language === 'ar' ? 'من' : 'of',
+    items: language === 'ar' ? 'منتج' : 'items',
+    page: language === 'ar' ? 'صفحة' : 'Page',
   };
 
   useEffect(() => {
@@ -149,7 +154,7 @@ const Products = () => {
           </div>
 
           <p className="text-sm font-bold text-vintage-700">
-            {language === 'ar' ? 'عم نعرض' : 'Showing'} <span className="text-vintage-900">{indexOfFirstItem + 1}</span> {language === 'ar' ? 'إلى' : 'to'} <span className="text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> {language === 'ar' ? 'من' : 'of'} <span className="text-vintage-900">{totalItems}</span> {language === 'ar' ? 'منتج' : 'items'}
+            {t.showing} <span className="text-vintage-900">{indexOfFirstItem + 1}</span> {t.to} <span className="text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> {t.of} <span className="text-vintage-900">{totalItems}</span> {t.items}
           </p>
         </div>
 
@@ -237,7 +242,7 @@ const Products = () => {
               </button>
             </nav>
             <p className="text-xs font-bold text-vintage-500">
-              {language === 'ar' ? 'صفحة' : 'Page'} {currentPage} {language === 'ar' ? 'من' : 'of'} {totalPages}
+              {t.page} {currentPage} {t.of} {totalPages}
             </p>
           </div>
         )}

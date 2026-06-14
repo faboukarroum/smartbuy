@@ -19,7 +19,7 @@ const Cart = () => {
   const hasPricedItems = items.some((item) => getDisplayPrice(item, currency, usdToLbpRate).hasPrice);
 
   const t = {
-    title: language === 'ar' ? 'سلة التسوق' : 'Your Shopping Bag',
+    title: language === 'ar' ? 'سلّة التسوق' : 'Your Shopping Bag',
     summary: language === 'ar' ? 'ملخص الطلب' : 'Order Summary',
     subtotal: language === 'ar' ? 'المجموع' : 'Subtotal',
     delivery: language === 'ar' ? 'التوصيل' : 'Delivery',
@@ -28,8 +28,8 @@ const Cart = () => {
     whatsapp: language === 'ar' ? 'اطلب عبر واتساب' : 'Order on WhatsApp',
     note: language === 'ar' ? 'الدفع عند الاستلام. الدفع بالكرت قريباً.' : 'Cash on delivery. Card payment coming soon.',
     remove: language === 'ar' ? 'حذف' : 'Remove',
-    clear: language === 'ar' ? 'فضي السلة' : 'Clear entire bag',
-    empty: language === 'ar' ? 'السلة فاضية' : 'Your bag is empty',
+    clear: language === 'ar' ? 'فضّي السلّة' : 'Clear entire bag',
+    empty: language === 'ar' ? 'السلّة فاضية' : 'Your bag is empty',
     emptyCopy: language === 'ar' ? 'بعدك ما ضفت ولا منتج. بلّش شوف اللقطات الموجودة.' : "Looks like you haven't added any items to your bag yet. Start exploring the latest finds.",
     start: language === 'ar' ? 'ابدأ التسوق' : 'Start Shopping',
   };

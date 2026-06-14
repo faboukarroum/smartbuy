@@ -18,6 +18,43 @@ const Checkout = () => {
   const [apiError, setApiError] = React.useState('');
   const { language } = usePreferencesStore();
 
+  const t = {
+    emptyBag: language === 'ar' ? 'السلّة فاضية.' : 'Your bag is empty.',
+    submitError: language === 'ar' ? 'ما قدرنا نثبت الطلب. جرّب مرة تانية.' : 'Unable to place your order. Please try again.',
+    received: language === 'ar' ? 'وصلنا طلبك!' : 'Order Received!',
+    thanks: language === 'ar'
+      ? 'شكراً لطلبك. رح نتواصل معك لتأكيد التوصيل.'
+      : 'Thank you for your order. We will contact you to confirm details and Aramex delivery.',
+    redirecting: language === 'ar' ? 'عم نحوّلك على الصفحة الرئيسية...' : 'Redirecting to home page...',
+    back: language === 'ar' ? 'رجوع للسلّة' : 'Back to bag',
+    deliveryInfo: language === 'ar' ? 'معلومات التوصيل' : 'Delivery Information',
+    fullName: language === 'ar' ? 'الاسم الكامل' : 'Full Name',
+    phone: language === 'ar' ? 'رقم الهاتف' : 'Phone',
+    email: language === 'ar' ? 'الإيميل (اختياري)' : 'Email (optional)',
+    address: language === 'ar' ? 'العنوان' : 'Address',
+    city: language === 'ar' ? 'المدينة' : 'City',
+    deliveryNote: language === 'ar' ? 'ملاحظة للتوصيل' : 'Delivery Note',
+    deliveryPlaceholder: language === 'ar'
+      ? 'المنطقة، أقرب معلم، الطابق، أو أفضل وقت للاتصال'
+      : 'Area, landmark, building, floor, or best time to call',
+    deliveryHelp: language === 'ar'
+      ? 'ضيف أي تفصيل بيساعد أرامكس أو فريقنا يوصل أسرع.'
+      : 'Add anything Aramex or our team should know to find you faster.',
+    paymentMethod: language === 'ar' ? 'طريقة الدفع' : 'Payment Method',
+    cod: language === 'ar' ? 'دفع عند الاستلام' : 'Cash on Delivery',
+    cardSoon: language === 'ar' ? 'الدفع بالكرت قريباً' : 'Card payment coming soon',
+    yourOrder: language === 'ar' ? 'طلبك' : 'Your Order',
+    qty: language === 'ar' ? 'الكمية' : 'Qty',
+    subtotal: language === 'ar' ? 'المجموع' : 'Subtotal',
+    delivery: language === 'ar' ? 'التوصيل' : 'Delivery',
+    viaAramex: language === 'ar' ? 'عبر أرامكس' : 'Via Aramex',
+    payment: language === 'ar' ? 'الدفع' : 'Payment',
+    onDelivery: language === 'ar' ? 'عند الاستلام' : 'On delivery',
+    placing: language === 'ar' ? 'عم نثبت الطلب...' : 'Placing Order...',
+    placeOrder: language === 'ar' ? 'ثبّت الطلب' : 'Place Order',
+    returns: language === 'ar' ? 'ما في إرجاع إلا إذا الغرض وصل غلط أو متضرر' : 'No returns unless the item arrives damaged or wrong',
+  };
+
   const subtotal = items.reduce((acc, item) => {
     const price = getDisplayPrice(item, 'USD');
     return price.hasPrice ? acc + price.value * item.quantity : acc;
@@ -26,7 +63,7 @@ const Checkout = () => {
 
   const onSubmit = async (data) => {
     if (items.length === 0) {
-      setApiError('Your bag is empty.');
+      setApiError(t.emptyBag);
       return;
     }
 
@@ -59,7 +96,7 @@ const Checkout = () => {
         navigate('/');
       }, 3000);
     } catch (err) {
-      setApiError(err.response?.data?.message || 'Unable to place your order. Please try again.');
+      setApiError(err.response?.data?.message || t.submitError);
     } finally {
       setIsSubmitting(false);
     }
@@ -67,20 +104,18 @@ const Checkout = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-vintage-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center bg-white p-12 rounded-3xl shadow-xl border border-vintage-200">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 text-green-500 rounded-full mb-6">
+      <div className="flex min-h-screen items-center justify-center bg-vintage-50 p-4">
+        <div className="w-full max-w-md rounded-3xl border border-vintage-200 bg-white p-12 text-center shadow-xl">
+          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-500">
             <CheckCircle2 size={40} />
           </div>
-          <h2 className="text-3xl font-serif font-bold text-vintage-900 mb-4">
-            {language === 'ar' ? 'Order Received!' : 'Order Received!'}
+          <h2 className="mb-4 text-3xl font-bold text-vintage-900">
+            {t.received}
           </h2>
-          <p className="text-vintage-600 mb-8">
-            {language === 'ar'
-              ? 'Thank you for your order. We will contact you to confirm delivery.'
-              : 'Thank you for your order. We will contact you to confirm details and Aramex delivery.'}
+          <p className="mb-8 text-vintage-600">
+            {t.thanks}
           </p>
-          <p className="text-sm text-vintage-400">{language === 'ar' ? 'Redirecting to home page...' : 'Redirecting to home page...'}</p>
+          <p className="text-sm text-vintage-400">{t.redirecting}</p>
         </div>
       </div>
     );
@@ -90,72 +125,72 @@ const Checkout = () => {
     <div className="min-h-screen bg-vintage-50">
       <Navbar />
 
-      <main className="container mx-auto px-4 md:px-8 py-12">
-        <Link to="/cart" className="inline-flex items-center text-vintage-600 hover:text-primary mb-8 transition-colors">
+      <main className="container mx-auto px-4 py-12 md:px-8">
+        <Link to="/cart" className="mb-8 inline-flex items-center text-vintage-600 transition-colors hover:text-primary">
           <ArrowLeft size={20} className="mr-2" />
-          {language === 'ar' ? 'Back to bag' : 'Back to bag'}
+          {t.back}
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-24">
           <div className="space-y-12">
             <section>
-              <h2 className="text-2xl font-serif font-bold text-vintage-900 mb-6 flex items-center gap-3">
+              <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold text-vintage-900">
                 <Truck className="text-primary" size={24} />
-                {language === 'ar' ? 'Delivery Information' : 'Delivery Information'}
+                {t.deliveryInfo}
               </h2>
-              <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-vintage-700 mb-1">Full Name</label>
-                  <input {...register('fullName', { required: true })} className="w-full px-4 py-3 bg-white border border-vintage-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+                  <label className="mb-1 block text-sm font-medium text-vintage-700">{t.fullName}</label>
+                  <input {...register('fullName', { required: true })} className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-vintage-700 mb-1">Phone</label>
-                  <input {...register('phone', { required: true })} type="tel" className="w-full px-4 py-3 bg-white border border-vintage-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+                  <label className="mb-1 block text-sm font-medium text-vintage-700">{t.phone}</label>
+                  <input {...register('phone', { required: true })} type="tel" className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-vintage-700 mb-1">Email (optional)</label>
-                  <input {...register('email')} type="email" className="w-full px-4 py-3 bg-white border border-vintage-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+                  <label className="mb-1 block text-sm font-medium text-vintage-700">{t.email}</label>
+                  <input {...register('email')} type="email" className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-vintage-700 mb-1">Address</label>
-                  <input {...register('address', { required: true })} className="w-full px-4 py-3 bg-white border border-vintage-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+                  <label className="mb-1 block text-sm font-medium text-vintage-700">{t.address}</label>
+                  <input {...register('address', { required: true })} className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-vintage-700 mb-1">City</label>
-                  <input {...register('city', { required: true })} className="w-full px-4 py-3 bg-white border border-vintage-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+                  <label className="mb-1 block text-sm font-medium text-vintage-700">{t.city}</label>
+                  <input {...register('city', { required: true })} className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-vintage-700 mb-1">Delivery Note</label>
+                  <label className="mb-1 block text-sm font-medium text-vintage-700">{t.deliveryNote}</label>
                   <textarea
                     {...register('deliveryNote', { required: true })}
                     rows={3}
-                    placeholder="Area, landmark, building, floor, or best time to call"
-                    className="w-full px-4 py-3 bg-white border border-vintage-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                    placeholder={t.deliveryPlaceholder}
+                    className="w-full resize-none rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
-                  <p className="mt-2 text-xs font-medium text-vintage-500">Add anything Aramex or our team should know to find you faster.</p>
+                  <p className="mt-2 text-xs font-medium text-vintage-500">{t.deliveryHelp}</p>
                 </div>
               </form>
             </section>
 
             <section>
-              <h2 className="text-2xl font-serif font-bold text-vintage-900 mb-6 flex items-center gap-3">
+              <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold text-vintage-900">
                 <CreditCard className="text-primary" size={24} />
-                Payment Method
+                {t.paymentMethod}
               </h2>
               <div className="grid grid-cols-1 gap-4">
-                <div className="p-4 border-2 border-primary bg-primary/5 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-2xl border-2 border-primary bg-primary/5 p-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-8 bg-vintage-900 rounded flex items-center justify-center text-[10px] text-white font-bold uppercase">COD</div>
-                    <span className="font-medium text-vintage-900">Cash on Delivery</span>
+                    <div className="flex h-8 w-12 items-center justify-center rounded bg-vintage-900 text-[10px] font-bold uppercase text-white">COD</div>
+                    <span className="font-medium text-vintage-900">{t.cod}</span>
                   </div>
-                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                    <div className="h-2 w-2 rounded-full bg-white"></div>
                   </div>
                 </div>
-                <div className="p-4 border border-vintage-200 bg-white rounded-2xl flex items-center justify-between opacity-70">
+                <div className="flex items-center justify-between rounded-2xl border border-vintage-200 bg-white p-4 opacity-70">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-8 bg-vintage-200 rounded flex items-center justify-center text-[10px] text-vintage-700 font-bold uppercase">Card</div>
-                    <span className="font-medium text-vintage-700">Card payment coming soon</span>
+                    <div className="flex h-8 w-12 items-center justify-center rounded bg-vintage-200 text-[10px] font-bold uppercase text-vintage-700">Card</div>
+                    <span className="font-medium text-vintage-700">{t.cardSoon}</span>
                   </div>
                 </div>
               </div>
@@ -163,39 +198,39 @@ const Checkout = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl border border-vintage-200 p-8 sticky top-32 shadow-sm">
-              <h2 className="text-2xl font-serif font-bold text-vintage-900 mb-6">Your Order</h2>
+            <div className="sticky top-32 rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+              <h2 className="mb-6 text-2xl font-bold text-vintage-900">{t.yourOrder}</h2>
 
-              <div className="max-h-64 overflow-y-auto mb-8 pr-2 space-y-4">
+              <div className="mb-8 max-h-64 space-y-4 overflow-y-auto pr-2">
                 {items.map((item) => {
                   const linePrice = getLineItemPrice(item, 'USD');
                   return (
                     <div key={item._id || item.id} className="flex gap-4">
-                      <div className="w-16 h-16 bg-vintage-50 rounded-lg overflow-hidden flex-shrink-0">
-                        <ProductImage product={item} alt={item.name} className="w-full h-full object-cover" />
+                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-vintage-50">
+                        <ProductImage product={item} alt={item.name} className="h-full w-full object-cover" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-vintage-900 text-sm">{item.name}</h4>
-                        <p className="text-xs text-vintage-400">Qty: {item.quantity}</p>
+                        <h4 className="text-sm font-medium text-vintage-900">{item.name}</h4>
+                        <p className="text-xs text-vintage-400">{t.qty}: {item.quantity}</p>
                       </div>
-                      <p className="font-medium text-vintage-900 text-sm">{linePrice.label}</p>
+                      <p className="text-sm font-medium text-vintage-900">{linePrice.label}</p>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="space-y-4 mb-8 pt-6 border-t border-vintage-100">
+              <div className="mb-8 space-y-4 border-t border-vintage-100 pt-6">
                 <div className="flex justify-between text-vintage-600">
-                  <span>Subtotal</span>
+                  <span>{t.subtotal}</span>
                   <span>{hasPricedItems ? formatCurrency(subtotal, 'USD') : 'Call for cost'}</span>
                 </div>
                 <div className="flex justify-between text-vintage-600">
-                  <span>Delivery</span>
-                  <span>Via Aramex</span>
+                  <span>{t.delivery}</span>
+                  <span>{t.viaAramex}</span>
                 </div>
-                <div className="border-t border-vintage-100 pt-4 flex justify-between text-xl font-bold text-vintage-900">
-                  <span>Payment</span>
-                  <span>On delivery</span>
+                <div className="flex justify-between border-t border-vintage-100 pt-4 text-xl font-bold text-vintage-900">
+                  <span>{t.payment}</span>
+                  <span>{t.onDelivery}</span>
                 </div>
               </div>
 
@@ -203,15 +238,15 @@ const Checkout = () => {
                 form="checkout-form"
                 type="submit"
                 disabled={isSubmitting || items.length === 0}
-                className="w-full vintage-button !py-4 flex items-center justify-center gap-3 shadow-lg shadow-primary/20 mb-6 disabled:cursor-not-allowed disabled:opacity-50"
+                className="vintage-button mb-6 flex w-full items-center justify-center gap-3 !py-4 shadow-lg shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" size={20} />
-                    Placing Order...
+                    {t.placing}
                   </>
                 ) : (
-                  'Place Order'
+                  t.placeOrder
                 )}
               </button>
 
@@ -224,7 +259,7 @@ const Checkout = () => {
 
               <div className="flex items-center justify-center gap-2 text-xs text-vintage-400">
                 <ShieldCheck size={16} />
-                <span>No returns unless the item arrives damaged or wrong</span>
+                <span>{t.returns}</span>
               </div>
             </div>
           </div>

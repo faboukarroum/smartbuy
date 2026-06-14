@@ -8,7 +8,7 @@ export const getProductWhatsAppUrl = (product, currency = 'USD', language = 'en'
   const price = getDisplayPrice(product, currency, usdToLbpRate).label;
   const id = product?._id || product?.id || 'N/A';
   const intro = language === 'ar'
-    ? `مرحبا ${BRAND_NAME}، بدي اسأل عن هيدا الغرض:`
+    ? `مرحبا ${BRAND_NAME}، بدي إسأل عن هيدا الغرض:`
     : `Hello ${BRAND_NAME}, I want to ask about this item:`;
 
   return whatsappUrl(`${intro}
@@ -21,7 +21,7 @@ Item ID: ${id}`);
 
 export const getCartWhatsAppUrl = (items = [], currency = 'USD', language = 'en', usdToLbpRate) => {
   const intro = language === 'ar'
-    ? `مرحبا ${BRAND_NAME}، بدي أطلب هالأغراض:`
+    ? `مرحبا ${BRAND_NAME}، بدي اطلب هالأغراض:`
     : `Hello ${BRAND_NAME}, I want to order these items:`;
 
   const lines = items.map((item, index) => {
@@ -33,6 +33,6 @@ export const getCartWhatsAppUrl = (items = [], currency = 'USD', language = 'en'
 
 ${lines.join('\n')}
 
-Delivery: Aramex across Lebanon
-Payment: Cash on delivery`);
+${language === 'ar' ? 'التوصيل: أرامكس على كل لبنان' : 'Delivery: Aramex across Lebanon'}
+${language === 'ar' ? 'الدفع: عند الاستلام' : 'Payment: Cash on delivery'}`);
 };

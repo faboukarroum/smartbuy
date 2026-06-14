@@ -1,17 +1,11 @@
+import { API_ORIGIN } from '../api/client';
+
 const PLACEHOLDER_PATTERNS = [
   'via.placeholder.com',
   'placehold.co',
   'placeholder.com',
   'dummyimage.com',
 ];
-
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:3001/api'
-    : 'https://smartbuyserver1.vercel.app/api');
-
-const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
 
 const CATEGORY_COLORS = {
   tools: ['#4F46E5', '#1E293B'],

@@ -31,13 +31,11 @@ const Navbar = () => {
         </div>
       </div>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
-        {/* Logo */}
         <Link to="/" className="flex items-center" aria-label={`${BRAND_NAME} home`}>
           <img src={BRAND_LOGO} alt={BRAND_NAME} className="h-11 w-auto max-w-[170px] object-contain sm:h-14 sm:max-w-[210px]" />
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden items-center gap-8 md:flex">
           <NavLink to="/" className={({ isActive }) => `text-sm font-extrabold transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-vintage-900'}`}>
             {labels.home}
           </NavLink>
@@ -46,11 +44,10 @@ const Navbar = () => {
           </NavLink>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => navigate('/products')}
-            className="p-2 text-vintage-900 hover:text-primary transition-colors"
+            className="p-2 text-vintage-900 transition-colors hover:text-primary"
             aria-label="Search products"
           >
             <Search size={20} />
@@ -58,7 +55,7 @@ const Navbar = () => {
 
           <button
             onClick={toggleCurrency}
-            className="hidden sm:inline-flex rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-extrabold text-vintage-900 shadow-sm hover:border-primary hover:text-primary"
+            className="hidden rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-extrabold text-vintage-900 shadow-sm hover:border-primary hover:text-primary sm:inline-flex"
             aria-label="Toggle currency"
           >
             {currency}
@@ -66,16 +63,16 @@ const Navbar = () => {
 
           <button
             onClick={toggleLanguage}
-            className="hidden sm:inline-flex rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-extrabold text-vintage-900 shadow-sm hover:border-primary hover:text-primary"
+            className="hidden rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-extrabold text-vintage-900 shadow-sm hover:border-primary hover:text-primary sm:inline-flex"
             aria-label="Toggle language"
           >
             {labels.language}
           </button>
-          
-          <Link to="/cart" className="p-2 text-vintage-900 hover:text-primary transition-colors relative">
+
+          <Link to="/cart" className="relative p-2 text-vintage-900 transition-colors hover:text-primary">
             <ShoppingCart size={20} />
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
+              <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
                 {cartCount}
               </span>
             )}
@@ -83,7 +80,7 @@ const Navbar = () => {
 
           {user ? (
             <div className="flex items-center space-x-3">
-              <Link to={user.role === 'admin' ? '/admin' : '/profile'} className="p-2 text-vintage-900 hover:text-primary transition-colors">
+              <Link to={user.role === 'admin' ? '/admin' : '/profile'} className="p-2 text-vintage-900 transition-colors hover:text-primary">
                 <User size={20} />
               </Link>
               <button onClick={logout} className="text-xs font-bold text-vintage-700 hover:text-primary">
@@ -91,21 +88,19 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <Link to="/login" className="p-2 text-vintage-900 hover:text-primary transition-colors" aria-label="Account">
+            <Link to="/login" className="p-2 text-vintage-900 transition-colors hover:text-primary" aria-label="Account">
               <User size={20} />
             </Link>
           )}
 
-          {/* Mobile Menu Toggle */}
-          <button className="md:hidden p-2 text-vintage-900" onClick={() => setIsOpen(!isOpen)}>
+          <button className="p-2 text-vintage-900 md:hidden" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden space-y-4 border-t border-vintage-100 bg-white px-4 py-5 shadow-lg">
+        <div className="space-y-4 border-t border-vintage-100 bg-white px-4 py-5 shadow-lg md:hidden">
           <NavLink to="/" className="block text-lg font-extrabold text-vintage-900" onClick={() => setIsOpen(false)}>{labels.home}</NavLink>
           <NavLink to="/products" className="block text-lg font-extrabold text-vintage-900" onClick={() => setIsOpen(false)}>{labels.shop}</NavLink>
           <button onClick={toggleCurrency} className="block text-lg font-extrabold text-vintage-900">{currency}</button>
