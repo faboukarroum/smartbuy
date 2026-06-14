@@ -67,6 +67,20 @@ export const updateOrderToDelivered = (id) => {
   return axios.put(`${BASE}/orders/${id}/deliver`, {}, config);
 };
 
+export const updateOrderToPaid = (id) => {
+  const config = getAuthConfig();
+  return axios.put(
+    `${BASE}/orders/${id}/pay`,
+    {
+      id: `cod-${id}`,
+      status: 'COD_COLLECTED',
+      update_time: new Date().toISOString(),
+      email_address: '',
+    },
+    config
+  );
+};
+
 // User API
 export const loginUser = (email, password) => {
   return axios.post(`${BASE}/users/login`, { email, password });

@@ -11,10 +11,9 @@ import {
   AlertCircle,
   MoreVertical,
   Calendar,
-  User,
   DollarSign
 } from 'lucide-react';
-import { getOrders, updateOrderToDelivered } from '../api/products';
+import { getOrders, updateOrderToDelivered, updateOrderToPaid } from '../api/products';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -55,6 +54,19 @@ const Orders = () => {
         setSelectedOrder((current) => data.find((order) => order._id === current?._id) || current);
       } catch {
         alert('Failed to update order status');
+      }
+    }
+  };
+
+  const handleMarkPaid = async (id) => {
+    if (window.confirm('Mark this COD payment as collected?')) {
+      try {
+        await updateOrderToPaid(id);
+        const { data } = await getOrders();
+        setOrders(data);
+        setSelectedOrder((current) => data.find((order) => order._id === current?._id) || current);
+      } catch {
+        alert('Failed to update payment status');
       }
     }
   };
@@ -195,6 +207,15 @@ const Orders = () => {
                         >
                           <Eye size={18} />
                         </button>
+                        {!order.isPaid && (
+                          <button
+                            onClick={() => handleMarkPaid(order._id)}
+                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            title="Mark COD Collected"
+                          >
+                            <DollarSign size={18} />
+                          </button>
+                        )}
                         {!order.isDelivered && (
                           <button 
                             onClick={() => handleDeliver(order._id)}
@@ -351,6 +372,17 @@ const Orders = () => {
                     >
                       <Truck size={16} />
                       Mark Delivered
+                    </button>
+                  )}
+
+                  {!selectedOrder.isPaid && (
+                    <button
+                      type="button"
+                      onClick={() => handleMarkPaid(selectedOrder._id)}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-700"
+                    >
+                      <DollarSign size={16} />
+                      Mark COD Collected
                     </button>
                   )}
                 </div>
