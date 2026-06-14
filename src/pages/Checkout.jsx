@@ -16,13 +16,13 @@ const Checkout = () => {
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [apiError, setApiError] = React.useState('');
-  const { language, currency } = usePreferencesStore();
+  const { language } = usePreferencesStore();
 
   const subtotal = items.reduce((acc, item) => {
-    const price = getDisplayPrice(item, currency);
+    const price = getDisplayPrice(item, 'USD');
     return price.hasPrice ? acc + price.value * item.quantity : acc;
   }, 0);
-  const hasPricedItems = items.some((item) => getDisplayPrice(item, currency).hasPrice);
+  const hasPricedItems = items.some((item) => getDisplayPrice(item, 'USD').hasPrice);
 
   const onSubmit = async (data) => {
     if (items.length === 0) {
@@ -168,7 +168,7 @@ const Checkout = () => {
 
               <div className="max-h-64 overflow-y-auto mb-8 pr-2 space-y-4">
                 {items.map((item) => {
-                  const linePrice = getLineItemPrice(item, currency);
+                  const linePrice = getLineItemPrice(item, 'USD');
                   return (
                     <div key={item._id || item.id} className="flex gap-4">
                       <div className="w-16 h-16 bg-vintage-50 rounded-lg overflow-hidden flex-shrink-0">
@@ -187,7 +187,7 @@ const Checkout = () => {
               <div className="space-y-4 mb-8 pt-6 border-t border-vintage-100">
                 <div className="flex justify-between text-vintage-600">
                   <span>Subtotal</span>
-                  <span>{hasPricedItems ? formatCurrency(subtotal, currency) : 'Call for cost'}</span>
+                  <span>{hasPricedItems ? formatCurrency(subtotal, 'USD') : 'Call for cost'}</span>
                 </div>
                 <div className="flex justify-between text-vintage-600">
                   <span>Delivery</span>

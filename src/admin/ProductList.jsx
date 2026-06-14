@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { getProducts, deleteProduct } from '../api/products';
 import ProductImage from '../components/ProductImage';
+import usePreferencesStore from '../store/preferencesStore';
+import { formatCurrency, getDisplayPrice } from '../utils/pricing';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -25,6 +27,7 @@ const ProductList = () => {
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
+  const usdToLbpRate = usePreferencesStore((state) => state.usdToLbpRate);
 
   useEffect(() => {
     setSearchQuery(searchParams.get('q') || '');
@@ -165,7 +168,12 @@ const ProductList = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 font-bold text-slate-900 text-sm">
-                      ${product.price.toFixed(2)}
+                      <div>${Number(product.price || 0).toFixed(2)}</div>
+                      <div className="mt-1 text-xs font-semibold text-slate-400">
+                        {Number.isFinite(Number(product.priceLbp))
+                          ? formatCurrency(Number(product.priceLbp), 'LBP')
+                          : `${getDisplayPrice(product, 'LBP', usdToLbpRate).label} est.`}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

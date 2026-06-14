@@ -106,6 +106,7 @@ const AdminLayout = () => {
     { name: 'Products', path: '/admin/products', icon: <Package size={20} /> },
     { name: 'Orders', path: '/admin/orders', icon: <ShoppingBag size={20} /> },
     { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
+    { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 
   const handleSidebarToggle = () => {

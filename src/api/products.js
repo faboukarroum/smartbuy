@@ -115,6 +115,16 @@ export const deleteUser = (id) => {
   return axios.delete(`${BASE}/users/${id}`, config);
 };
 
+// Settings API
+export const getSettings = () => {
+  return axios.get(`${BASE}/settings`);
+};
+
+export const updateSettings = (data) => {
+  const config = getAuthConfig();
+  return axios.put(`${BASE}/settings`, data, config);
+};
+
 // Helper for auth headers
 const getAuthConfig = () => {
   const authData = JSON.parse(localStorage.getItem('fikilshi-auth') || localStorage.getItem('smartbuy-auth'));

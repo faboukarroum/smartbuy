@@ -33,6 +33,7 @@ const ProductForm = () => {
     defaultValues: {
       name: '',
       price: 0,
+      priceLbp: '',
       description: '',
       image: '',
       images: [],
@@ -57,6 +58,8 @@ const ProductForm = () => {
   const previewProduct = {
     name: watch('name') || 'Product Preview',
     category: watch('category') || 'home',
+    price: watch('price'),
+    priceLbp: watch('priceLbp'),
     image: mainImage,
     images: Array.isArray(galleryImages) ? galleryImages.map((entry) => entry?.url).filter(Boolean) : [],
   };
@@ -72,6 +75,7 @@ const ProductForm = () => {
           // Manual fix for field arrays if needed
           if (data.images) setValue('images', data.images.map(img => ({ url: img })));
           if (data.details) setValue('details', data.details.map(det => ({ text: det })));
+          setValue('priceLbp', data.priceLbp ?? '');
           
           setError(null);
         } catch (err) {
@@ -154,6 +158,9 @@ const ProductForm = () => {
       const payload = {
         ...data,
         price: Number(data.price),
+        priceLbp: data.priceLbp === '' || data.priceLbp === null || data.priceLbp === undefined
+          ? null
+          : Number(data.priceLbp),
         stock: Number(data.stock),
         images: data.images.map(img => img.url).filter(url => url.trim() !== ''),
         details: data.details.map(det => det.text).filter(text => text.trim() !== '')
@@ -404,6 +411,19 @@ const ProductForm = () => {
                   {...register('price', { required: 'Price is required', min: 0 })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary transition-all font-bold"
                 />
+                <p className="mt-2 text-xs text-slate-400">Used for checkout and saved orders.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Display Price (LBP)</label>
+                <input
+                  type="number"
+                  step="1000"
+                  {...register('priceLbp', { min: 0 })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-primary transition-all font-bold"
+                  placeholder="Optional"
+                />
+                <p className="mt-2 text-xs text-slate-400">Shown when customers toggle to LBP before checkout. Checkout still uses USD.</p>
               </div>
 
               <div>

@@ -19,7 +19,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const { language, currency } = usePreferencesStore();
+  const { language, currency, usdToLbpRate } = usePreferencesStore();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -42,7 +42,7 @@ const ProductDetail = () => {
 
   const allImages = product ? getProductImageCandidates(product) : [];
   const galleryImages = allImages.length > 0 ? allImages : [getProductFallbackImage(product)];
-  const displayPrice = product ? getDisplayPrice(product, currency) : null;
+  const displayPrice = product ? getDisplayPrice(product, currency, usdToLbpRate) : null;
   const stock = Number(product?.stock);
   const isOutOfStock = Number.isFinite(stock) && stock <= 0;
   const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
@@ -230,7 +230,7 @@ const ProductDetail = () => {
                   {isOutOfStock ? 'Out of Stock' : (language === 'ar' ? 'أضف للسلة' : 'Add to Cart')}
                 </button>
                 <a
-                  href={getProductWhatsAppUrl(product, currency, language)}
+                  href={getProductWhatsAppUrl(product, currency, language, usdToLbpRate)}
                   className="w-14 h-14 flex items-center justify-center rounded-full border border-vintage-200 bg-white text-vintage-600 hover:text-green-600 hover:border-green-200 transition-all"
                   aria-label="Order on WhatsApp"
                 >

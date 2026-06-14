@@ -10,13 +10,13 @@ import { getCartWhatsAppUrl } from '../utils/whatsapp';
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, clearCart } = useCartStore();
-  const { language, currency } = usePreferencesStore();
+  const { language, currency, usdToLbpRate } = usePreferencesStore();
 
   const subtotal = items.reduce((acc, item) => {
-    const price = getDisplayPrice(item, currency);
+    const price = getDisplayPrice(item, currency, usdToLbpRate);
     return price.hasPrice ? acc + price.value * item.quantity : acc;
   }, 0);
-  const hasPricedItems = items.some((item) => getDisplayPrice(item, currency).hasPrice);
+  const hasPricedItems = items.some((item) => getDisplayPrice(item, currency, usdToLbpRate).hasPrice);
 
   const t = {
     title: language === 'ar' ? 'سلة التسوق' : 'Your Shopping Bag',
@@ -46,7 +46,7 @@ const Cart = () => {
             <div className="space-y-5 lg:col-span-2">
               {items.map((item) => {
                 const itemId = item._id || item.id;
-                const linePrice = getLineItemPrice(item, currency);
+                const linePrice = getLineItemPrice(item, currency, usdToLbpRate);
                 const stock = Number(item.stock);
                 const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
 
@@ -115,7 +115,7 @@ const Cart = () => {
                   <ArrowRight size={20} className="rtl:rotate-180" />
                 </Link>
 
-                <a href={getCartWhatsAppUrl(items, currency, language)} className="mb-4 flex w-full items-center justify-center gap-3 rounded-full border border-green-200 bg-green-50 py-4 font-black text-green-700 transition-colors hover:border-green-500">
+                <a href={getCartWhatsAppUrl(items, currency, language, usdToLbpRate)} className="mb-4 flex w-full items-center justify-center gap-3 rounded-full border border-green-200 bg-green-50 py-4 font-black text-green-700 transition-colors hover:border-green-500">
                   <MessageCircle size={20} />
                   {t.whatsapp}
                 </a>

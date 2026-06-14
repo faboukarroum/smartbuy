@@ -9,7 +9,8 @@ import { getDisplayPrice } from '../utils/pricing';
 const ProductCard = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
   const currency = usePreferencesStore((state) => state.currency);
-  const displayPrice = getDisplayPrice(product, currency);
+  const usdToLbpRate = usePreferencesStore((state) => state.usdToLbpRate);
+  const displayPrice = getDisplayPrice(product, currency, usdToLbpRate);
   const stock = Number(product.stock);
   const isOutOfStock = Number.isFinite(stock) && stock <= 0;
   const isLimited = Number.isFinite(stock) && stock > 0 && stock <= 5;

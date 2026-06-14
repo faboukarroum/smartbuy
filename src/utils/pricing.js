@@ -14,12 +14,17 @@ const readNumber = (...values) => {
   return null;
 };
 
-export const getProductPrices = (product = {}) => {
+export const DEFAULT_USD_TO_LBP_RATE = 89500;
+
+export const getProductPrices = (product = {}, usdToLbpRate = DEFAULT_USD_TO_LBP_RATE) => {
   const priceObject = product.price && typeof product.price === 'object' ? product.price : {};
+  const usdPrice = readNumber(product.priceUsd, product.usdPrice, product.priceUSD, priceObject.usd, priceObject.USD, product.price);
+  const lbpPrice = readNumber(product.priceLbp, product.lbpPrice, product.priceLBP, priceObject.lbp, priceObject.LBP);
+  const rate = readNumber(usdToLbpRate, DEFAULT_USD_TO_LBP_RATE);
 
   return {
-    USD: readNumber(product.priceUsd, product.usdPrice, product.priceUSD, priceObject.usd, priceObject.USD, product.price),
-    LBP: readNumber(product.priceLbp, product.lbpPrice, product.priceLBP, priceObject.lbp, priceObject.LBP),
+    USD: usdPrice,
+    LBP: lbpPrice !== null ? lbpPrice : (usdPrice !== null && rate !== null ? Math.round(usdPrice * rate) : null),
   };
 };
 
@@ -40,8 +45,8 @@ export const formatCurrency = (value, currency) => {
   }).format(value);
 };
 
-export const getDisplayPrice = (product, preferredCurrency = 'USD') => {
-  const prices = getProductPrices(product);
+export const getDisplayPrice = (product, preferredCurrency = 'USD', usdToLbpRate = DEFAULT_USD_TO_LBP_RATE) => {
+  const prices = getProductPrices(product, usdToLbpRate);
   const preferredPrice = prices[preferredCurrency];
 
   if (preferredPrice !== null) {
@@ -73,8 +78,8 @@ export const getDisplayPrice = (product, preferredCurrency = 'USD') => {
   };
 };
 
-export const getLineItemPrice = (item, preferredCurrency = 'USD') => {
-  const displayPrice = getDisplayPrice(item, preferredCurrency);
+export const getLineItemPrice = (item, preferredCurrency = 'USD', usdToLbpRate = DEFAULT_USD_TO_LBP_RATE) => {
+  const displayPrice = getDisplayPrice(item, preferredCurrency, usdToLbpRate);
 
   if (!displayPrice.hasPrice) {
     return displayPrice;
