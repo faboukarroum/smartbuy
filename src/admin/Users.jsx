@@ -27,6 +27,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [lastLoadedAt, setLastLoadedAt] = useState(null);
   const [notice, setNotice] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -51,6 +52,7 @@ const Users = () => {
 
       setUsers(userList);
       setError('');
+      setLastLoadedAt(new Date());
     } catch (err) {
       setUsers([]);
       setError(err.response?.data?.message || 'Live user records are unavailable right now.');
@@ -190,11 +192,18 @@ const Users = () => {
             <button
               type="button"
               onClick={fetchUsers}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-primary hover:text-primary"
+              disabled={loading}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Refresh
+              {loading ? 'Refreshing...' : 'Refresh'}
             </button>
           </div>
+
+          {lastLoadedAt && !error && (
+            <p className="mt-3 text-xs font-medium text-slate-400">
+              Live user records last loaded {lastLoadedAt.toLocaleString()}.
+            </p>
+          )}
 
           {notice && (
             <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -203,9 +212,19 @@ const Users = () => {
           )}
 
           {error && (
-            <div className="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              <AlertCircle size={18} />
-              {error}
+            <div className="mt-4 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} />
+                <span>{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={fetchUsers}
+                disabled={loading}
+                className="self-start rounded-lg bg-amber-100 px-3 py-2 text-xs font-black uppercase tracking-wide text-amber-900 hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
+              >
+                Retry
+              </button>
             </div>
           )}
         </div>
@@ -216,10 +235,26 @@ const Users = () => {
               <Loader2 className="mb-4 animate-spin" size={40} />
               <p className="font-medium">Loading users...</p>
             </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
+              <AlertCircle size={44} className="mb-4 text-amber-500" />
+              <h2 className="text-lg font-black text-slate-900">Unable to load live users</h2>
+              <p className="mt-2 max-w-md text-sm text-slate-500">
+                The admin panel is not showing fallback or sample accounts. Retry once the API connection is available.
+              </p>
+              <button
+                type="button"
+                onClick={fetchUsers}
+                disabled={loading}
+                className="mt-6 rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Retry Loading Users
+              </button>
+            </div>
           ) : filteredUsers.length === 0 ? (
             <div className="py-20 text-center text-slate-400">
               <UsersIcon size={40} className="mx-auto mb-4 opacity-20" />
-              <p className="font-medium">{error ? 'No live users loaded.' : 'No users matched your search.'}</p>
+              <p className="font-medium">No users matched your search.</p>
             </div>
           ) : (
             <table className="w-full border-collapse text-left">

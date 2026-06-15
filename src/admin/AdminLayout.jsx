@@ -248,7 +248,7 @@ const AdminLayout = () => {
           loading: false,
           items: [
             {
-              id: 'fallback',
+              id: 'notifications-unavailable',
               icon: <AlertCircle size={16} className="text-amber-600" />,
               title: 'Notifications unavailable',
               description: 'The admin alert feed could not be loaded just now.',
