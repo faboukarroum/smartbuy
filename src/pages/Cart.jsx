@@ -51,7 +51,7 @@ const Cart = () => {
                 const maxQty = Number.isFinite(stock) && stock > 0 ? stock : Infinity;
 
                 return (
-                  <div key={itemId} className="grid gap-5 rounded-3xl border border-vintage-200 bg-white p-5 shadow-sm sm:grid-cols-[8rem_1fr]">
+                  <div key={itemId} className="grid gap-5 rounded-2xl border border-vintage-200 bg-white p-4 shadow-sm sm:grid-cols-[8rem_1fr] sm:rounded-3xl sm:p-5">
                     <div className="h-40 overflow-hidden rounded-2xl bg-vintage-100 sm:h-36">
                       <ProductImage product={item} alt={item.name} className="h-full w-full object-cover" />
                     </div>
@@ -105,7 +105,7 @@ const Cart = () => {
             </div>
 
             <div>
-              <div className="sticky top-32 rounded-3xl border border-vintage-200 bg-white p-7 shadow-xl shadow-vintage-900/5">
+              <div className="sticky top-32 rounded-2xl border border-vintage-200 bg-white p-5 shadow-xl shadow-vintage-900/5 sm:rounded-3xl sm:p-7">
                 <h2 className="mb-6 text-2xl font-black text-vintage-900">{t.summary}</h2>
 
                 <div className="mb-8 space-y-4">
@@ -134,8 +134,8 @@ const Cart = () => {
             </div>
           </div>
         ) : (
-          <div className="rounded-3xl bg-white py-24 text-center shadow-sm ring-1 ring-vintage-200">
-            <div className="mb-8 inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-vintage-100 text-primary">
+          <div className="rounded-2xl bg-white px-5 py-20 text-center shadow-sm ring-1 ring-vintage-200 sm:rounded-3xl sm:px-8 sm:py-24">
+            <div className="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-vintage-100 text-primary sm:h-24 sm:w-24 sm:rounded-3xl">
               <ShoppingBag size={48} />
             </div>
             <h2 className="mb-4 text-3xl font-black text-vintage-900">{t.empty}</h2>

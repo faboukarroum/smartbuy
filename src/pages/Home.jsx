@@ -131,7 +131,7 @@ const Home = () => {
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl border border-vintage-200 bg-white py-16 text-center">
+            <div className="rounded-2xl border border-vintage-200 bg-white px-5 py-14 text-center sm:rounded-3xl sm:px-8 sm:py-16">
               <h3 className="mb-2 text-2xl font-black text-vintage-900">{t.empty}</h3>
               <p className="text-vintage-700">{t.emptyCopy}</p>
             </div>

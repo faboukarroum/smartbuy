@@ -87,7 +87,7 @@ const Products = () => {
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-4 py-12 md:px-8">
-        <header className="mb-10 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-vintage-200 md:p-8">
+        <header className="mb-10 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-vintage-200 sm:rounded-3xl md:p-8">
           <p className="mb-2 text-sm font-extrabold uppercase text-primary">{language === 'ar' ? 'أوتلت لبنان' : 'Lebanon Outlet'}</p>
           <h1 className="mb-3 text-4xl font-black text-vintage-900 md:text-5xl">{t.title}</h1>
           <p className="max-w-2xl text-vintage-700">{t.intro}</p>
@@ -114,7 +114,7 @@ const Products = () => {
             </div>
           </div>
 
-          <div className="grid gap-4 rounded-3xl border border-vintage-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto_auto] md:items-center">
+          <div className="grid gap-4 rounded-2xl border border-vintage-200 bg-white p-4 shadow-sm sm:rounded-3xl md:grid-cols-[1fr_auto_auto] md:items-center">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-vintage-500 rtl:left-auto rtl:right-4" size={18} />
               <input
@@ -169,7 +169,7 @@ const Products = () => {
             <p className="text-lg font-bold">{t.loading}</p>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-red-100 bg-red-50 p-8 py-24 text-red-500">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-red-50 p-6 py-20 text-red-500 sm:rounded-3xl sm:p-8 sm:py-24">
             <AlertCircle className="mb-4" size={48} />
             <h3 className="mb-2 text-xl font-black">{t.error}</h3>
             <p className="mb-6 max-w-md text-center">{error}</p>
@@ -184,7 +184,7 @@ const Products = () => {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl bg-white py-24 text-center shadow-sm ring-1 ring-vintage-200">
+          <div className="rounded-2xl bg-white px-5 py-20 text-center shadow-sm ring-1 ring-vintage-200 sm:rounded-3xl sm:px-8 sm:py-24">
             <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-vintage-100 text-primary">
               <Filter size={32} />
             </div>

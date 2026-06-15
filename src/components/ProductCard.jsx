@@ -21,7 +21,8 @@ const ProductCard = ({ product }) => {
         <ProductImage
           product={product}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          wrapperClassName="h-full w-full"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         
         {/* Quick actions overlay */}
@@ -59,14 +60,14 @@ const ProductCard = ({ product }) => {
         )}
       </div>
       
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <h3 className="mb-1 text-xs font-black uppercase tracking-wide text-primary">
           {product.category}
         </h3>
-        <Link to={`/products/${product._id || product.id}`} className="mb-3 block min-h-12 text-lg font-black leading-tight text-vintage-900 transition-colors hover:text-primary">
+        <Link to={`/products/${product._id || product.id}`} className="mb-3 block min-h-12 text-base font-black leading-tight text-vintage-900 transition-colors hover:text-primary sm:text-lg">
           {product.name}
         </Link>
-        <p className="text-2xl font-black text-vintage-900">
+        <p className="text-xl font-black text-vintage-900 sm:text-2xl">
           {displayPrice.label}
         </p>
       </div>

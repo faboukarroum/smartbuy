@@ -235,7 +235,7 @@ const Checkout = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-32 rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+            <div className="sticky top-32 rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-8">
               <h2 className="mb-6 text-2xl font-bold text-vintage-900">{t.yourOrder}</h2>
 
               <div className="mb-8 max-h-64 space-y-4 overflow-y-auto pr-2">
