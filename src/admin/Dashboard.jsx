@@ -10,10 +10,8 @@ import {
   ShoppingBag,
   TrendingUp,
   Truck,
-  Users,
 } from 'lucide-react';
-import { getOrders, getProducts, getUsers } from '../api/products';
-import useAuthStore from '../store/authStore';
+import { getOrders, getProducts } from '../api/products';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -58,28 +56,43 @@ const formatRelativeDate = (value) => {
 };
 
 const getOrderStatus = (order) => {
-  if (order.isDelivered) {
+  const fulfillmentStatus = order.fulfillmentStatus || (order.isDelivered ? 'delivered' : 'ready_for_pickup');
+
+  if (order.isPaid && fulfillmentStatus === 'delivered') {
     return {
-      label: 'Delivered',
+      label: 'Completed',
+      className: 'bg-emerald-100 text-emerald-600',
+    };
+  }
+
+  if (fulfillmentStatus === 'delivered') {
+    return {
+      label: 'Delivered, COD Pending',
       className: 'bg-blue-100 text-blue-600',
     };
   }
 
   if (order.isPaid) {
     return {
-      label: 'Processing',
-      className: 'bg-emerald-100 text-emerald-600',
+      label: 'COD Collected',
+      className: 'bg-teal-100 text-teal-600',
+    };
+  }
+
+  if (fulfillmentStatus === 'picked_up') {
+    return {
+      label: 'Picked Up',
+      className: 'bg-indigo-100 text-indigo-600',
     };
   }
 
   return {
-    label: 'Pending COD',
+    label: 'Ready for Pickup',
     className: 'bg-amber-100 text-amber-600',
   };
 };
 
 const Dashboard = () => {
-  const { user } = useAuthStore();
   const [dashboardData, setDashboardData] = useState({
     loading: true,
     error: '',
@@ -92,33 +105,37 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [productsResult, ordersResult, usersResult] = await Promise.allSettled([
+        const [productsResult, ordersResult] = await Promise.allSettled([
           getProducts({ pageSize: 250 }),
           getOrders(),
-          getUsers(),
         ]);
 
         const productsData = productsResult.status === 'fulfilled' ? productsResult.value.data : null;
         const ordersData = ordersResult.status === 'fulfilled' ? ordersResult.value.data : [];
-        const usersData = usersResult.status === 'fulfilled' ? usersResult.value.data : [];
 
         const products = productsData?.products || [];
         const productCount = productsData?.count || products.length;
         const orders = Array.isArray(ordersData) ? ordersData : [];
-        const users = Array.isArray(usersData) ? usersData : usersData?.users || [];
 
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+        const expectedRevenue = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
         const paidOrders = orders.filter((order) => order.isPaid);
+        const collectedRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+        const pendingCodRevenue = orders
+          .filter((order) => !order.isPaid)
+          .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
         const deliveredOrders = orders.filter((order) => order.isDelivered);
-        const pendingCodOrders = orders.filter((order) => !order.isPaid && !order.isDelivered);
-        const fulfillmentOrders = orders.filter((order) => !order.isDelivered);
+        const completedOrders = orders.filter((order) => order.isPaid && order.isDelivered);
+        const pendingCodOrders = orders.filter((order) => !order.isPaid);
+        const readyForPickupOrders = orders.filter((order) => (order.fulfillmentStatus || (order.isDelivered ? 'delivered' : 'ready_for_pickup')) === 'ready_for_pickup');
+        const pickedUpOrders = orders.filter((order) => order.fulfillmentStatus === 'picked_up');
+        const fulfillmentOrders = orders.filter((order) => (order.fulfillmentStatus || (order.isDelivered ? 'delivered' : 'ready_for_pickup')) !== 'delivered');
         const lowStockProducts = products.filter((product) => typeof product.stock === 'number' && product.stock > 0 && product.stock <= 5);
         const outOfStockProducts = products.filter((product) => product.stock === 0);
         const healthyInventoryProducts = products.filter((product) => typeof product.stock === 'number' && product.stock > 0);
         const inventoryHealth = productCount > 0 ? healthyInventoryProducts.length / productCount : 0;
         const paidRate = orders.length > 0 ? paidOrders.length / orders.length : 0;
         const deliveryRate = orders.length > 0 ? deliveredOrders.length / orders.length : 0;
-        const userCount = users.length > 0 ? users.length : (user ? 1 : 0);
+        const completionRate = orders.length > 0 ? completedOrders.length / orders.length : 0;
         const recentOrders = [...orders]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5)
@@ -137,28 +154,28 @@ const Dashboard = () => {
             : '',
           stats: [
             {
-              label: 'Total Revenue',
-              value: currencyFormatter.format(totalRevenue),
+              label: 'Collected Revenue',
+              value: currencyFormatter.format(collectedRevenue),
               icon: <DollarSign className="text-emerald-500" />,
-              detail: `${orders.length} order${orders.length === 1 ? '' : 's'} total`,
+              detail: `${currencyFormatter.format(expectedRevenue)} expected total`,
             },
             {
               label: 'Total Orders',
               value: orders.length.toString(),
               icon: <ShoppingBag className="text-blue-500" />,
-              detail: `${fulfillmentOrders.length} awaiting delivery`,
+              detail: `${completedOrders.length} completed`,
+            },
+            {
+              label: 'Pending COD',
+              value: currencyFormatter.format(pendingCodRevenue),
+              icon: <Clock className="text-amber-500" />,
+              detail: `${pendingCodOrders.length} order${pendingCodOrders.length === 1 ? '' : 's'} unpaid`,
             },
             {
               label: 'Total Products',
               value: productCount.toString(),
               icon: <Package className="text-purple-500" />,
               detail: `${outOfStockProducts.length} out of stock`,
-            },
-            {
-              label: 'Registered Users',
-              value: userCount.toString(),
-              icon: <Users className="text-orange-500" />,
-              detail: users.length > 0 ? 'Live user count' : 'Using available auth data',
             },
           ],
           recentOrders,
@@ -184,17 +201,29 @@ const Dashboard = () => {
               accent: 'bg-blue-500',
               dot: 'bg-blue-500',
             },
+            {
+              label: 'Order Completion',
+              value: percentFormatter.format(completionRate),
+              width: `${Math.round(completionRate * 100)}%`,
+              accent: 'bg-slate-700',
+              dot: 'bg-slate-700',
+            },
           ],
           tasks: [
             {
               icon: <Clock size={16} />,
               className: 'bg-amber-50 text-amber-700',
-              label: `${pendingCodOrders.length} COD order${pendingCodOrders.length === 1 ? '' : 's'} awaiting delivery`,
+              label: `${pendingCodOrders.length} COD order${pendingCodOrders.length === 1 ? '' : 's'} awaiting collection`,
             },
             {
               icon: <Truck size={16} />,
               className: 'bg-blue-50 text-blue-700',
               label: `${fulfillmentOrders.length} order${fulfillmentOrders.length === 1 ? '' : 's'} still need delivery`,
+            },
+            {
+              icon: <Package size={16} />,
+              className: 'bg-indigo-50 text-indigo-700',
+              label: `${readyForPickupOrders.length} ready for pickup, ${pickedUpOrders.length} with delivery company`,
             },
             {
               icon: <AlertCircle size={16} />,
@@ -219,7 +248,7 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user]);
+  }, []);
 
   if (dashboardData.loading) {
     return (

@@ -62,6 +62,11 @@ export const updateOrderToDelivered = (id) => {
   return axios.put(`${API_BASE_URL}/orders/${id}/deliver`, {}, config);
 };
 
+export const updateOrderFulfillmentStatus = (id, fulfillmentStatus) => {
+  const config = getAuthConfig();
+  return axios.put(`${API_BASE_URL}/orders/${id}/fulfillment-status`, { fulfillmentStatus }, config);
+};
+
 export const updateOrderToPaid = (id) => {
   const config = getAuthConfig();
   return axios.put(

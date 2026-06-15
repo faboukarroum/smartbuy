@@ -13,7 +13,85 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
-import { getOrders, updateOrderToDelivered, updateOrderToPaid } from '../api/products';
+import { getOrders, updateOrderFulfillmentStatus, updateOrderToDelivered, updateOrderToPaid } from '../api/products';
+
+const fulfillmentOptions = [
+  { value: 'ready_for_pickup', label: 'Ready for pickup' },
+  { value: 'picked_up', label: 'Picked up by delivery company' },
+  { value: 'delivered', label: 'Delivered' },
+];
+
+const getFulfillmentStatus = (order) => {
+  if (order.fulfillmentStatus) {
+    return order.fulfillmentStatus;
+  }
+
+  return order.isDelivered ? 'delivered' : 'ready_for_pickup';
+};
+
+const getFulfillmentMeta = (order) => {
+  const status = getFulfillmentStatus(order);
+
+  if (status === 'delivered') {
+    return {
+      label: 'Delivered',
+      className: 'text-blue-600',
+      badgeClassName: 'bg-blue-50 text-blue-700',
+    };
+  }
+
+  if (status === 'picked_up') {
+    return {
+      label: 'Picked up by delivery company',
+      className: 'text-indigo-600',
+      badgeClassName: 'bg-indigo-50 text-indigo-700',
+    };
+  }
+
+  return {
+    label: 'Ready for pickup',
+    className: 'text-amber-600',
+    badgeClassName: 'bg-amber-50 text-amber-700',
+  };
+};
+
+const getPaymentMeta = (order) => {
+  if (order.isPaid) {
+    return {
+      label: 'COD collected',
+      className: 'text-emerald-600',
+      badgeClassName: 'bg-emerald-50 text-emerald-700',
+    };
+  }
+
+  return {
+    label: 'COD pending',
+    className: 'text-red-500',
+    badgeClassName: 'bg-red-50 text-red-600',
+  };
+};
+
+const getCombinedStatus = (order) => {
+  const fulfillmentStatus = getFulfillmentStatus(order);
+
+  if (order.isPaid && fulfillmentStatus === 'delivered') {
+    return 'Completed';
+  }
+
+  if (order.isPaid) {
+    return 'COD collected, delivery pending';
+  }
+
+  if (fulfillmentStatus === 'delivered') {
+    return 'Delivered, COD pending';
+  }
+
+  if (fulfillmentStatus === 'picked_up') {
+    return 'With delivery company, COD pending';
+  }
+
+  return 'Ready for pickup, COD pending';
+};
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -55,6 +133,17 @@ const Orders = () => {
       } catch {
         alert('Failed to update order status');
       }
+    }
+  };
+
+  const handleFulfillmentStatusChange = async (id, fulfillmentStatus) => {
+    try {
+      await updateOrderFulfillmentStatus(id, fulfillmentStatus);
+      const { data } = await getOrders();
+      setOrders(data);
+      setSelectedOrder((current) => data.find((order) => order._id === current?._id) || current);
+    } catch {
+      alert('Failed to update fulfillment status');
     }
   };
 
@@ -170,7 +259,7 @@ const Orders = () => {
                       {order.isPaid ? (
                         <div className="flex flex-col">
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase">
-                            <CheckCircle2 size={12} /> Paid
+                            <CheckCircle2 size={12} /> COD collected
                           </span>
                           <span className="text-[10px] text-slate-400 mt-0.5">
                             {new Date(order.paidAt).toLocaleDateString()}
@@ -183,20 +272,26 @@ const Orders = () => {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {order.isDelivered ? (
-                        <div className="flex flex-col">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 uppercase">
-                            <Truck size={12} /> Delivered
-                          </span>
-                          <span className="text-[10px] text-slate-400 mt-0.5">
-                            {new Date(order.deliveredAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 uppercase">
-                          <Clock size={12} /> Awaiting delivery
+                      <div className="flex min-w-56 flex-col gap-2">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase ${getFulfillmentMeta(order).className}`}>
+                          {getFulfillmentStatus(order) === 'delivered' ? <Truck size={12} /> : <Clock size={12} />}
+                          {getFulfillmentMeta(order).label}
                         </span>
-                      )}
+                        <select
+                          value={getFulfillmentStatus(order)}
+                          onChange={(event) => handleFulfillmentStatusChange(order._id, event.target.value)}
+                          className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-700 outline-none focus:border-primary"
+                        >
+                          {fulfillmentOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                        {(order.fulfillmentStatusUpdatedAt || order.deliveredAt) && (
+                          <span className="text-[10px] text-slate-400">
+                            Updated {new Date(order.fulfillmentStatusUpdatedAt || order.deliveredAt).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -216,7 +311,7 @@ const Orders = () => {
                             <DollarSign size={18} />
                           </button>
                         )}
-                        {!order.isDelivered && (
+                        {getFulfillmentStatus(order) !== 'delivered' && (
                           <button 
                             onClick={() => handleDeliver(order._id)}
                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -262,11 +357,11 @@ const Orders = () => {
               <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-xl bg-amber-50 px-4 py-3">
                   <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Payment</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">{selectedOrder.isPaid ? 'Paid' : 'Pending COD'}</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{getPaymentMeta(selectedOrder).label}</p>
                 </div>
                 <div className="rounded-xl bg-blue-50 px-4 py-3">
-                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">Delivery</p>
-                  <p className="mt-1 text-sm font-bold text-slate-900">{selectedOrder.isDelivered ? 'Delivered' : 'Awaiting delivery'}</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">Fulfillment</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{getFulfillmentMeta(selectedOrder).label}</p>
                 </div>
                 <div className="rounded-xl bg-slate-50 px-4 py-3">
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Method</p>
@@ -279,6 +374,32 @@ const Orders = () => {
               </div>
 
               <div className="grid gap-6 lg:grid-cols-2">
+                <section className="rounded-2xl border border-slate-200 p-5 lg:col-span-2">
+                  <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Current State</h3>
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${getFulfillmentMeta(selectedOrder).badgeClassName}`}>
+                        {getFulfillmentMeta(selectedOrder).label}
+                      </span>
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${getPaymentMeta(selectedOrder).badgeClassName}`}>
+                        {getPaymentMeta(selectedOrder).label}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase text-slate-700">
+                        {getCombinedStatus(selectedOrder)}
+                      </span>
+                    </div>
+                    <select
+                      value={getFulfillmentStatus(selectedOrder)}
+                      onChange={(event) => handleFulfillmentStatusChange(selectedOrder._id, event.target.value)}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-primary"
+                    >
+                      {fulfillmentOptions.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </section>
+
                 <section className="rounded-2xl border border-slate-200 p-5">
                   <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Customer</h3>
                   <div className="space-y-3 text-sm">
@@ -342,6 +463,8 @@ const Orders = () => {
                   <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500">Timeline</h3>
                   <div className="space-y-3 text-sm text-slate-600">
                     <p>Created: {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : 'Unknown'}</p>
+                    <p>Fulfillment: {getFulfillmentMeta(selectedOrder).label}</p>
+                    <p>Fulfillment updated: {selectedOrder.fulfillmentStatusUpdatedAt ? new Date(selectedOrder.fulfillmentStatusUpdatedAt).toLocaleString() : 'Not updated yet'}</p>
                     <p>Paid: {selectedOrder.isPaid && selectedOrder.paidAt ? new Date(selectedOrder.paidAt).toLocaleString() : 'Not collected yet'}</p>
                     <p>Delivered: {selectedOrder.isDelivered && selectedOrder.deliveredAt ? new Date(selectedOrder.deliveredAt).toLocaleString() : 'Not delivered yet'}</p>
                   </div>
@@ -364,7 +487,7 @@ const Orders = () => {
                     </div>
                   </div>
 
-                  {!selectedOrder.isDelivered && (
+                  {getFulfillmentStatus(selectedOrder) !== 'delivered' && (
                     <button
                       type="button"
                       onClick={() => handleDeliver(selectedOrder._id)}
