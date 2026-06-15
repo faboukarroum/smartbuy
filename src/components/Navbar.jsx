@@ -41,9 +41,9 @@ const Navbar = () => {
           <span className="hidden sm:inline">{labels.promo}</span>
         </div>
       </div>
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:py-3 md:px-8">
         <Link to="/" className="flex items-center" aria-label={`${BRAND_NAME} home`}>
-          <img src={BRAND_LOGO} alt={BRAND_NAME} className="h-11 w-auto max-w-[170px] object-contain sm:h-14 sm:max-w-[210px]" />
+          <img src={BRAND_LOGO} alt={BRAND_NAME} className="h-10 w-auto max-w-[155px] object-contain sm:h-14 sm:max-w-[210px]" />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -117,14 +117,14 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-x-0 top-[116px] z-40 md:hidden">
+        <div className="fixed inset-x-0 top-[84px] z-40 sm:top-[116px] md:hidden">
           <button
             type="button"
-            className="fixed inset-x-0 bottom-0 top-[116px] -z-10 bg-vintage-900/35 backdrop-blur-[2px]"
+            className="fixed inset-x-0 bottom-0 top-[84px] -z-10 bg-vintage-900/35 backdrop-blur-[2px] sm:top-[116px]"
             onClick={() => setIsOpen(false)}
             aria-label="Close menu"
           />
-          <div id="mobile-menu" className="mx-3 max-h-[calc(100vh-132px)] overflow-y-auto rounded-b-3xl border border-t-0 border-vintage-200 bg-white px-4 py-5 shadow-2xl shadow-vintage-900/20">
+          <div id="mobile-menu" className="mx-3 max-h-[calc(100vh-100px)] overflow-y-auto rounded-b-3xl border border-t-0 border-vintage-200 bg-white px-4 py-5 shadow-2xl shadow-vintage-900/20 sm:max-h-[calc(100vh-132px)]">
             <div className="space-y-2">
               <NavLink
                 to="/"
