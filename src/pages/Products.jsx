@@ -140,16 +140,17 @@ const Products = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-bold text-vintage-700">{t.perPage}</span>
+              <span className="mr-1 text-sm font-bold text-vintage-700 rtl:ml-1 rtl:mr-0">{t.perPage}</span>
               {pageSizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setItemsPerPage(size)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-black transition-all ${
+                  className={`flex min-h-11 min-w-11 items-center justify-center rounded-full px-4 text-sm font-black transition-all ${
                     itemsPerPage === size
-                      ? 'bg-primary text-white'
-                      : 'border border-vintage-200 bg-white text-vintage-700 hover:border-primary hover:text-primary'
+                      ? 'bg-primary text-white shadow-lg shadow-primary/15'
+                      : 'border border-vintage-200 bg-white text-vintage-700 shadow-sm hover:border-primary hover:text-primary'
                   }`}
+                  aria-label={`${size} items per page`}
                 >
                   {size}
                 </button>
