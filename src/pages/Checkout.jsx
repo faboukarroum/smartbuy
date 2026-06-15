@@ -11,7 +11,7 @@ import { createOrder } from '../api/products';
 
 const Checkout = () => {
   const { items, clearCart } = useCartStore();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [apiError, setApiError] = React.useState('');
@@ -47,7 +47,16 @@ const Checkout = () => {
     placing: language === 'ar' ? 'عم نثبت الطلب...' : 'Placing Order...',
     placeOrder: language === 'ar' ? 'ثبّت الطلب' : 'Place Order',
     returns: language === 'ar' ? 'ما في إرجاع إلا إذا الغرض وصل غلط أو متضرر' : 'No returns unless the item arrives damaged or wrong',
+    required: language === 'ar' ? 'هيدا الحقل مطلوب' : 'This field is required',
+    invalidEmail: language === 'ar' ? 'اكتب إيميل صحيح' : 'Enter a valid email',
+    phoneHelp: language === 'ar' ? 'اكتب رقم يقدر الفريق يتواصل معك عليه.' : 'Use a number our team can reach on delivery day.',
+    addressPlaceholder: language === 'ar' ? 'الشارع، المبنى، الطابق' : 'Street, building, floor',
+    cityPlaceholder: language === 'ar' ? 'بيروت، جونية، صيدا...' : 'Beirut, Jounieh, Saida...',
   };
+
+  const fieldClassName = (hasError) => `w-full rounded-xl border bg-white px-4 py-3 outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 ${
+    hasError ? 'border-red-300 ring-2 ring-red-100' : 'border-vintage-200'
+  }`;
 
   const subtotal = items.reduce((acc, item) => {
     const price = getDisplayPrice(item, 'USD');
@@ -114,36 +123,88 @@ const Checkout = () => {
                 <Truck className="text-primary" size={24} />
                 {t.deliveryInfo}
               </h2>
-              <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2" noValidate>
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.fullName}</label>
-                  <input {...register('fullName', { required: true })} className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <input
+                    {...register('fullName', { required: t.required })}
+                    autoComplete="name"
+                    className={fieldClassName(errors.fullName)}
+                    aria-invalid={errors.fullName ? 'true' : 'false'}
+                  />
+                  {errors.fullName && <p className="mt-1 text-xs font-bold text-red-500">{errors.fullName.message}</p>}
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.phone}</label>
-                  <input {...register('phone', { required: true })} type="tel" className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <input
+                    {...register('phone', { required: t.required })}
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="+961"
+                    className={fieldClassName(errors.phone)}
+                    aria-invalid={errors.phone ? 'true' : 'false'}
+                  />
+                  {errors.phone ? (
+                    <p className="mt-1 text-xs font-bold text-red-500">{errors.phone.message}</p>
+                  ) : (
+                    <p className="mt-1 text-xs font-medium text-vintage-500">{t.phoneHelp}</p>
+                  )}
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.email}</label>
-                  <input {...register('email')} type="email" className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <input
+                    {...register('email', {
+                      pattern: {
+                        value: /^\S+@\S+\.\S+$/,
+                        message: t.invalidEmail,
+                      },
+                    })}
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    className={fieldClassName(errors.email)}
+                    aria-invalid={errors.email ? 'true' : 'false'}
+                  />
+                  {errors.email && <p className="mt-1 text-xs font-bold text-red-500">{errors.email.message}</p>}
                 </div>
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.address}</label>
-                  <input {...register('address', { required: true })} className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <input
+                    {...register('address', { required: t.required })}
+                    autoComplete="street-address"
+                    placeholder={t.addressPlaceholder}
+                    className={fieldClassName(errors.address)}
+                    aria-invalid={errors.address ? 'true' : 'false'}
+                  />
+                  {errors.address && <p className="mt-1 text-xs font-bold text-red-500">{errors.address.message}</p>}
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.city}</label>
-                  <input {...register('city', { required: true })} className="w-full rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <input
+                    {...register('city', { required: t.required })}
+                    autoComplete="address-level2"
+                    placeholder={t.cityPlaceholder}
+                    className={fieldClassName(errors.city)}
+                    aria-invalid={errors.city ? 'true' : 'false'}
+                  />
+                  {errors.city && <p className="mt-1 text-xs font-bold text-red-500">{errors.city.message}</p>}
                 </div>
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.deliveryNote}</label>
                   <textarea
-                    {...register('deliveryNote', { required: true })}
+                    {...register('deliveryNote', { required: t.required })}
                     rows={3}
                     placeholder={t.deliveryPlaceholder}
-                    className="w-full resize-none rounded-xl border border-vintage-200 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    autoComplete="off"
+                    className={`${fieldClassName(errors.deliveryNote)} resize-none`}
+                    aria-invalid={errors.deliveryNote ? 'true' : 'false'}
                   />
-                  <p className="mt-2 text-xs font-medium text-vintage-500">{t.deliveryHelp}</p>
+                  {errors.deliveryNote ? (
+                    <p className="mt-1 text-xs font-bold text-red-500">{errors.deliveryNote.message}</p>
+                  ) : (
+                    <p className="mt-2 text-xs font-medium text-vintage-500">{t.deliveryHelp}</p>
+                  )}
                 </div>
               </form>
             </section>
