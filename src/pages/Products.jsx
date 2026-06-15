@@ -94,20 +94,24 @@ const Products = () => {
         </header>
 
         <div className="mb-10 space-y-5">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-black capitalize transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-vintage-900 text-white shadow-lg'
-                    : 'border border-vintage-200 bg-white text-vintage-900 hover:border-primary hover:text-primary'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="relative -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-8 bg-gradient-to-r from-vintage-50 to-transparent md:hidden" />
+            <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-8 bg-gradient-to-l from-vintage-50 to-transparent md:hidden" />
+            <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth py-1">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`min-h-11 snap-start whitespace-nowrap rounded-full px-5 text-sm font-black capitalize transition-all ${
+                    selectedCategory === cat
+                      ? 'bg-vintage-900 text-white shadow-lg shadow-vintage-900/15'
+                      : 'border border-vintage-200 bg-white text-vintage-900 shadow-sm hover:border-primary hover:text-primary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid gap-4 rounded-3xl border border-vintage-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto_auto] md:items-center">

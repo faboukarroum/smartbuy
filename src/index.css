@@ -88,4 +88,12 @@
   .brand-chip:hover {
     @apply border-primary text-primary;
   }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
