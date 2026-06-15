@@ -209,41 +209,51 @@ const ProductDetail = () => {
             </div>
 
             <div className="mb-12 space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center rounded-full border border-vintage-200 bg-white px-2">
+              <div className="grid gap-3 sm:flex sm:items-center sm:gap-4">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 sm:contents">
+                  <div className="flex min-h-14 items-center justify-center rounded-full border border-vintage-200 bg-white px-2">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="flex h-11 w-11 items-center justify-center text-vintage-600 hover:text-primary"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="w-11 text-center font-medium text-vintage-900">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
+                      disabled={quantity >= maxQty}
+                      className="flex h-11 w-11 items-center justify-center text-vintage-600 hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="flex h-10 w-10 items-center justify-center text-vintage-600 hover:text-primary"
+                    onClick={() => addToCart({ ...product, quantity })}
+                    disabled={isOutOfStock}
+                    className="vintage-button flex min-h-14 min-w-0 items-center justify-center gap-2 !px-4 !py-3 text-sm font-black shadow-lg shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-50 min-[360px]:gap-3 sm:flex-1 sm:text-base"
                   >
-                    -
-                  </button>
-                  <span className="w-12 text-center font-medium text-vintage-900">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
-                    disabled={quantity >= maxQty}
-                    className="flex h-10 w-10 items-center justify-center text-vintage-600 hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
-                  >
-                    +
+                    <ShoppingCart className="hidden min-[360px]:block" size={20} />
+                    <span className="truncate">{isOutOfStock ? t.outOfStock : t.add}</span>
                   </button>
                 </div>
-                <button
-                  onClick={() => addToCart({ ...product, quantity })}
-                  disabled={isOutOfStock}
-                  className="vintage-button flex flex-1 items-center justify-center gap-3 !py-4 shadow-lg shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <ShoppingCart size={20} />
-                  {isOutOfStock ? t.outOfStock : t.add}
-                </button>
-                <a
-                  href={getProductWhatsAppUrl(product, currency, language, usdToLbpRate)}
-                  className="flex h-14 w-14 items-center justify-center rounded-full border border-vintage-200 bg-white text-vintage-600 transition-all hover:border-green-200 hover:text-green-600"
-                  aria-label="Order on WhatsApp"
-                >
-                  <MessageCircle size={24} />
-                </a>
-                <button className="flex h-14 w-14 items-center justify-center rounded-full border border-vintage-200 bg-white text-vintage-400 transition-all hover:border-red-200 hover:text-red-500">
-                  <Heart size={24} />
-                </button>
+                <div className="grid grid-cols-[minmax(0,1fr)_3.5rem] gap-3 sm:contents">
+                  <a
+                    href={getProductWhatsAppUrl(product, currency, language, usdToLbpRate)}
+                    className="flex min-h-14 min-w-0 items-center justify-center gap-2 rounded-full border border-green-200 bg-white px-4 text-sm font-black text-green-700 transition-all hover:border-green-300 hover:text-green-700 sm:h-14 sm:w-14 sm:px-0 sm:text-vintage-600 sm:hover:text-green-600"
+                    aria-label="Order on WhatsApp"
+                  >
+                    <MessageCircle size={22} />
+                    <span className="truncate sm:sr-only">WhatsApp</span>
+                  </a>
+                  <button
+                    className="flex h-14 w-14 items-center justify-center rounded-full border border-vintage-200 bg-white text-vintage-400 transition-all hover:border-red-200 hover:text-red-500"
+                    aria-label="Save product"
+                  >
+                    <Heart size={22} />
+                  </button>
+                </div>
               </div>
             </div>
 
