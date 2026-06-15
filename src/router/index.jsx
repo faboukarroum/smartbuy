@@ -4,6 +4,7 @@ import Products from '../pages/Products'
 import ProductDetail from '../pages/ProductDetail'
 import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
+import OrderConfirmation from '../pages/OrderConfirmation'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import ForgotPassword from '../pages/ForgotPassword'
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
   { path: '/products/:id', element: <ProductDetail /> },
   { path: '/cart', element: <Cart /> },
   { path: '/checkout', element: <Checkout /> },
+  { path: '/order-confirmation/:id/:receiptToken', element: <OrderConfirmation /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
   { path: '/forgot-password', element: <ForgotPassword /> },

@@ -47,6 +47,10 @@ export const createOrder = (data) => {
   return axios.post(`${API_BASE_URL}/orders`, data, config);
 };
 
+export const getOrderReceipt = (id, receiptToken) => {
+  return axios.get(`${API_BASE_URL}/orders/${id}/receipt/${receiptToken}`);
+};
+
 export const getOrders = () => {
   const config = getAuthConfig();
   return axios.get(`${API_BASE_URL}/orders`, config);

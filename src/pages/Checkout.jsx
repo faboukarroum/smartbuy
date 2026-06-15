@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, ShieldCheck, Truck } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CreditCard, Loader2, ShieldCheck, Truck } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useCartStore from '../store/cartStore';
 import ProductImage from '../components/ProductImage';
@@ -13,7 +13,6 @@ const Checkout = () => {
   const { items, clearCart } = useCartStore();
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
-  const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [apiError, setApiError] = React.useState('');
   const { language } = usePreferencesStore();
@@ -21,11 +20,6 @@ const Checkout = () => {
   const t = {
     emptyBag: language === 'ar' ? 'السلّة فاضية.' : 'Your bag is empty.',
     submitError: language === 'ar' ? 'ما قدرنا نثبت الطلب. جرّب مرة تانية.' : 'Unable to place your order. Please try again.',
-    received: language === 'ar' ? 'وصلنا طلبك!' : 'Order Received!',
-    thanks: language === 'ar'
-      ? 'شكراً لطلبك. رح نتواصل معك لتأكيد التوصيل.'
-      : 'Thank you for your order. We will contact you to confirm details and Aramex delivery.',
-    redirecting: language === 'ar' ? 'عم نحوّلك على الصفحة الرئيسية...' : 'Redirecting to home page...',
     back: language === 'ar' ? 'رجوع للسلّة' : 'Back to bag',
     deliveryInfo: language === 'ar' ? 'معلومات التوصيل' : 'Delivery Information',
     fullName: language === 'ar' ? 'الاسم الكامل' : 'Full Name',
@@ -71,7 +65,7 @@ const Checkout = () => {
       setIsSubmitting(true);
       setApiError('');
 
-      await createOrder({
+      const response = await createOrder({
         orderItems: items.map((item) => ({
           product: item._id || item.id,
           qty: item.quantity,
@@ -90,36 +84,18 @@ const Checkout = () => {
         paymentMethod: 'Cash on Delivery',
       });
 
+      const order = response.data;
       clearCart();
-      setIsSubmitted(true);
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
+      navigate(`/order-confirmation/${order._id}/${order.receiptToken}`, {
+        replace: true,
+        state: { order },
+      });
     } catch (err) {
       setApiError(err.response?.data?.message || t.submitError);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (isSubmitted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-vintage-50 p-4">
-        <div className="w-full max-w-md rounded-3xl border border-vintage-200 bg-white p-12 text-center shadow-xl">
-          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-500">
-            <CheckCircle2 size={40} />
-          </div>
-          <h2 className="mb-4 text-3xl font-bold text-vintage-900">
-            {t.received}
-          </h2>
-          <p className="mb-8 text-vintage-600">
-            {t.thanks}
-          </p>
-          <p className="text-sm text-vintage-400">{t.redirecting}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-vintage-50">
