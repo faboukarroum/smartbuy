@@ -122,6 +122,7 @@ const ProductDetail = () => {
                 product={product}
                 src={galleryImages[selectedImage]}
                 alt={`${product.name} - Image ${selectedImage + 1}`}
+                wrapperClassName="h-full w-full"
                 className="h-full w-full object-cover"
               />
 
@@ -167,6 +168,7 @@ const ProductDetail = () => {
                       product={product}
                       src={image}
                       alt={`${product.name} thumbnail ${index + 1}`}
+                      wrapperClassName="h-full w-full"
                       className="h-full w-full object-cover"
                     />
                   </button>
