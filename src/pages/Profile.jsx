@@ -122,20 +122,20 @@ const Profile = () => {
     <div className="min-h-screen bg-vintage-50">
       <Navbar />
 
-      <main className="mx-auto max-w-5xl px-4 py-12 md:px-8">
-        <div className="mb-8 rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+      <main className="mx-auto max-w-5xl px-4 py-8 md:px-8 md:py-12">
+        <div className="mb-8 rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-8">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white">
               <User size={30} />
             </div>
             <div>
-              <h1 className="text-3xl font-black text-vintage-900">{user.name || 'Your Account'}</h1>
-              <p className="text-vintage-600">{user.email}</p>
+              <h1 className="break-words text-2xl font-black text-vintage-900 sm:text-3xl">{user.name || 'Your Account'}</h1>
+              <p className="break-words text-vintage-600">{user.email}</p>
             </div>
           </div>
         </div>
 
-        <section className="mb-8 rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+        <section className="mb-8 rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-black text-vintage-900">Profile Details</h2>
             <p className="text-sm text-vintage-600">Update your account information and password.</p>
@@ -197,7 +197,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={profileSaving}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-vintage-900 px-6 py-3 text-sm font-black text-white transition-colors hover:bg-vintage-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-vintage-900 px-6 py-3 text-sm font-black text-white transition-colors hover:bg-vintage-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   {profileSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                   Save Profile
@@ -207,13 +207,13 @@ const Profile = () => {
           )}
         </section>
 
-        <section className="rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+        <section className="rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-8">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-black text-vintage-900">Order History</h2>
               <p className="text-sm text-vintage-600">Orders placed while signed in appear here.</p>
             </div>
-            <Link to="/products" className="rounded-full bg-vintage-900 px-5 py-3 text-sm font-black text-white hover:bg-vintage-800">
+            <Link to="/products" className="inline-flex min-h-11 items-center rounded-full bg-vintage-900 px-5 py-3 text-sm font-black text-white hover:bg-vintage-800">
               Shop
             </Link>
           </div>
@@ -236,7 +236,7 @@ const Profile = () => {
           ) : (
             <div className="space-y-4">
               {orders.map((order) => (
-                <div key={order._id} className="rounded-2xl border border-vintage-100 bg-vintage-50 p-5">
+                <div key={order._id} className="rounded-2xl border border-vintage-100 bg-vintage-50 p-4 sm:p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <Package className="text-primary" size={22} />

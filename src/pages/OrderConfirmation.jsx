@@ -95,7 +95,7 @@ const OrderConfirmation = () => {
       <div className="min-h-screen bg-vintage-50">
         <Navbar />
         <main className="mx-auto max-w-3xl px-4 py-16 md:px-8">
-          <div className="rounded-3xl border border-red-100 bg-white p-10 text-center shadow-sm">
+          <div className="rounded-2xl border border-red-100 bg-white p-6 text-center shadow-sm sm:rounded-3xl sm:p-10">
             <AlertCircle className="mx-auto mb-4 text-red-500" size={44} />
             <h1 className="mb-3 text-3xl font-black text-vintage-900">{t.missing}</h1>
             <p className="mb-8 text-vintage-600">{error}</p>
@@ -117,7 +117,7 @@ const OrderConfirmation = () => {
       <Navbar />
 
       <main className="mx-auto max-w-6xl px-4 py-12 md:px-8">
-        <section className="mb-8 rounded-3xl border border-vintage-200 bg-white p-8 shadow-sm">
+        <section className="mb-8 rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="flex gap-4">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-green-100 text-green-600">
@@ -125,18 +125,18 @@ const OrderConfirmation = () => {
               </div>
               <div>
                 <p className="mb-2 text-sm font-black uppercase tracking-wide text-primary">{t.orderId}: #{order._id?.slice(-8)}</p>
-                <h1 className="text-4xl font-black text-vintage-900">{t.title}</h1>
+                <h1 className="text-3xl font-black text-vintage-900 sm:text-4xl">{t.title}</h1>
                 <p className="mt-3 max-w-2xl text-vintage-600">{t.intro}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
               {user && (
-                <Link to="/profile" className="inline-flex items-center gap-2 rounded-full border border-vintage-200 bg-white px-5 py-3 text-sm font-black text-vintage-900 hover:border-primary hover:text-primary">
+                <Link to="/profile" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-vintage-200 bg-white px-5 py-3 text-sm font-black text-vintage-900 hover:border-primary hover:text-primary">
                   <User size={18} />
                   {t.profileCta}
                 </Link>
               )}
-              <Link to="/products" className="inline-flex items-center gap-2 rounded-full bg-vintage-900 px-5 py-3 text-sm font-black text-white hover:bg-vintage-800">
+              <Link to="/products" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-vintage-900 px-5 py-3 text-sm font-black text-white hover:bg-vintage-800">
                 <ShoppingBag size={18} />
                 {t.shopMore}
               </Link>
@@ -161,7 +161,7 @@ const OrderConfirmation = () => {
               </div>
             </section>
 
-            <section className="rounded-3xl border border-vintage-200 bg-white shadow-sm">
+            <section className="rounded-2xl border border-vintage-200 bg-white shadow-sm sm:rounded-3xl">
               <div className="border-b border-vintage-100 px-6 py-5">
                 <h2 className="flex items-center gap-2 text-xl font-black text-vintage-900">
                   <Package size={22} className="text-primary" />
@@ -170,22 +170,22 @@ const OrderConfirmation = () => {
               </div>
               <div className="divide-y divide-vintage-100">
                 {(order.orderItems || []).map((item) => (
-                  <div key={`${item.product}-${item.name}`} className="flex gap-4 px-6 py-5">
+                  <div key={`${item.product}-${item.name}`} className="flex gap-4 px-4 py-5 sm:px-6">
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-vintage-100">
-                      <ProductImage product={item} src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                      <ProductImage product={item} src={item.image} alt={item.name} className="h-full w-full object-cover" sizes="5rem" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-black text-vintage-900">{item.name}</p>
                       <p className="mt-1 text-sm text-vintage-500">{t.qty}: {item.qty}</p>
                     </div>
-                    <p className="font-black text-vintage-900">{formatCurrency(Number(item.price || 0) * Number(item.qty || 0), 'USD')}</p>
+                    <p className="shrink-0 text-sm font-black text-vintage-900 sm:text-base">{formatCurrency(Number(item.price || 0) * Number(item.qty || 0), 'USD')}</p>
                   </div>
                 ))}
               </div>
             </section>
 
             <section className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-vintage-200 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-6">
                 <h2 className="mb-4 text-xl font-black text-vintage-900">{t.customer}</h2>
                 <div className="space-y-2 text-sm text-vintage-600">
                   <p className="font-black text-vintage-900">{customerName}</p>
@@ -194,7 +194,7 @@ const OrderConfirmation = () => {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-vintage-200 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-6">
                 <h2 className="mb-4 flex items-center gap-2 text-xl font-black text-vintage-900">
                   <Truck size={22} className="text-primary" />
                   {t.delivery}
@@ -213,7 +213,7 @@ const OrderConfirmation = () => {
             </section>
           </div>
 
-          <aside className="rounded-3xl border border-vintage-200 bg-white p-6 shadow-sm lg:sticky lg:top-28 lg:self-start">
+          <aside className="rounded-2xl border border-vintage-200 bg-white p-5 shadow-sm sm:rounded-3xl sm:p-6 lg:sticky lg:top-28 lg:self-start">
             <h2 className="mb-5 flex items-center gap-2 text-xl font-black text-vintage-900">
               <ReceiptText size={22} className="text-primary" />
               {t.total}

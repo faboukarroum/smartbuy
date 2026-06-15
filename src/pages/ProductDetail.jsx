@@ -19,6 +19,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [justAdded, setJustAdded] = useState(false);
   const { language, currency, usdToLbpRate } = usePreferencesStore();
 
   const t = {
@@ -69,6 +70,16 @@ const ProductDetail = () => {
     setSelectedImage((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
   };
 
+  const handleAddToCart = () => {
+    if (isOutOfStock) {
+      return;
+    }
+
+    addToCart({ ...product, quantity });
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 1800);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-vintage-50">
@@ -109,7 +120,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-vintage-50">
       <Navbar />
 
-      <main className="container mx-auto px-4 py-12 md:px-8">
+      <main className="container mx-auto px-4 pb-28 pt-12 md:px-8 md:py-12">
         <Link to="/products" className="mb-8 inline-flex items-center text-vintage-600 transition-colors hover:text-primary">
           <ArrowLeft size={20} className="mr-2" />
           {t.back}
@@ -124,6 +135,9 @@ const ProductDetail = () => {
                 alt={`${product.name} - Image ${selectedImage + 1}`}
                 wrapperClassName="h-full w-full"
                 className="h-full w-full object-cover"
+                loading="eager"
+                fetchPriority="high"
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
 
               {galleryImages.length > 1 && (
@@ -170,6 +184,7 @@ const ProductDetail = () => {
                       alt={`${product.name} thumbnail ${index + 1}`}
                       wrapperClassName="h-full w-full"
                       className="h-full w-full object-cover"
+                      sizes="25vw"
                     />
                   </button>
                 ))}
@@ -210,7 +225,21 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <div className="mb-12 space-y-6">
+            <div className="mb-12 space-y-5">
+              <div className="grid gap-3 rounded-2xl border border-vintage-200 bg-white p-4 shadow-sm sm:grid-cols-3">
+                <div className="flex items-center gap-3 text-sm font-bold text-vintage-600">
+                  <Shield size={20} className="shrink-0 text-primary" />
+                  <span>{support.payment}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm font-bold text-vintage-600">
+                  <Truck size={20} className="shrink-0 text-primary" />
+                  <span>{support.delivery}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm font-bold text-vintage-600">
+                  <CreditCard size={20} className="shrink-0 text-primary" />
+                  <span>{support.card}</span>
+                </div>
+              </div>
               <div className="grid gap-3 sm:flex sm:items-center sm:gap-4">
                 <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 sm:contents">
                   <div className="flex min-h-14 items-center justify-center rounded-full border border-vintage-200 bg-white px-2">
@@ -232,12 +261,14 @@ const ProductDetail = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => addToCart({ ...product, quantity })}
+                    onClick={handleAddToCart}
                     disabled={isOutOfStock}
-                    className="vintage-button flex min-h-14 min-w-0 items-center justify-center gap-2 !px-4 !py-3 text-sm font-black shadow-lg shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-50 min-[360px]:gap-3 sm:flex-1 sm:text-base"
+                    className={`vintage-button flex min-h-14 min-w-0 items-center justify-center gap-2 !px-4 !py-3 text-sm font-black shadow-lg disabled:cursor-not-allowed disabled:opacity-50 min-[360px]:gap-3 sm:flex-1 sm:text-base ${
+                      justAdded ? '!bg-green-600 shadow-green-600/20' : 'shadow-primary/20'
+                    }`}
                   >
                     <ShoppingCart className="hidden min-[360px]:block" size={20} />
-                    <span className="truncate">{isOutOfStock ? t.outOfStock : t.add}</span>
+                    <span className="truncate">{isOutOfStock ? t.outOfStock : (justAdded ? 'Added to cart' : t.add)}</span>
                   </button>
                 </div>
                 <div className="grid grid-cols-[minmax(0,1fr)_3.5rem] gap-3 sm:contents">
@@ -295,6 +326,27 @@ const ProductDetail = () => {
           </div>
         </div>
       </main>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-vintage-200 bg-white/95 px-4 py-3 shadow-2xl shadow-vintage-900/20 backdrop-blur md:hidden">
+        <div className="mx-auto grid max-w-lg grid-cols-[1fr_auto] gap-3">
+          <button
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={`vintage-button flex min-h-12 items-center justify-center gap-2 !px-4 !py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50 ${
+              justAdded ? '!bg-green-600' : ''
+            }`}
+          >
+            <ShoppingCart size={18} />
+            <span>{isOutOfStock ? t.outOfStock : (justAdded ? 'Added to cart' : t.add)}</span>
+          </button>
+          <a
+            href={getProductWhatsAppUrl(product, currency, language, usdToLbpRate)}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-green-200 bg-green-50 text-green-700"
+            aria-label="Order on WhatsApp"
+          >
+            <MessageCircle size={21} />
+          </a>
+        </div>
+      </div>
     </div>
   );
 };

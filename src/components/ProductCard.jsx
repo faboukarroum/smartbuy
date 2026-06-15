@@ -10,10 +10,21 @@ const ProductCard = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
   const currency = usePreferencesStore((state) => state.currency);
   const usdToLbpRate = usePreferencesStore((state) => state.usdToLbpRate);
+  const [justAdded, setJustAdded] = React.useState(false);
   const displayPrice = getDisplayPrice(product, currency, usdToLbpRate);
   const stock = Number(product.stock);
   const isOutOfStock = Number.isFinite(stock) && stock <= 0;
   const isLimited = Number.isFinite(stock) && stock > 0 && stock <= 5;
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) {
+      return;
+    }
+
+    addToCart({ ...product, quantity: 1 });
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 1600);
+  };
 
   return (
     <div className="vintage-card group transition-transform duration-300 hover:-translate-y-1">
@@ -23,6 +34,7 @@ const ProductCard = ({ product }) => {
           alt={product.name}
           wrapperClassName="h-full w-full"
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
         />
         
         {/* Quick actions overlay */}
@@ -34,10 +46,11 @@ const ProductCard = ({ product }) => {
             <Eye size={20} />
           </Link>
           <button 
-            onClick={() => addToCart({ ...product, quantity: 1 })}
+            onClick={handleAddToCart}
             disabled={isOutOfStock}
             className="p-3 bg-white text-vintage-900 rounded-full hover:bg-primary hover:text-white transition-colors duration-300 shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
             title={isOutOfStock ? 'Out of stock' : 'Add to cart'}
+            aria-label={isOutOfStock ? 'Out of stock' : `Add ${product.name} to cart`}
           >
             <ShoppingCart size={20} />
           </button>
@@ -67,9 +80,25 @@ const ProductCard = ({ product }) => {
         <Link to={`/products/${product._id || product.id}`} className="mb-3 block min-h-12 text-base font-black leading-tight text-vintage-900 transition-colors hover:text-primary sm:text-lg">
           {product.name}
         </Link>
-        <p className="text-xl font-black text-vintage-900 sm:text-2xl">
-          {displayPrice.label}
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 text-xl font-black text-vintage-900 sm:text-2xl">
+            {displayPrice.label}
+          </p>
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-all md:hidden ${
+              justAdded ? 'bg-green-600 shadow-green-600/20' : 'bg-primary shadow-primary/20'
+            } disabled:cursor-not-allowed disabled:bg-vintage-300 disabled:shadow-none`}
+            aria-label={isOutOfStock ? 'Out of stock' : `Add ${product.name} to cart`}
+          >
+            <ShoppingCart size={19} />
+          </button>
+        </div>
+        {justAdded && (
+          <p className="mt-2 text-xs font-black uppercase tracking-wide text-green-700">Added to cart</p>
+        )}
       </div>
     </div>
   );

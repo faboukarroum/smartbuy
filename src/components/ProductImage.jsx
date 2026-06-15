@@ -8,6 +8,10 @@ const ProductImage = ({
   className = '',
   wrapperClassName = '',
   imgClassName = '',
+  loading = 'lazy',
+  decoding = 'async',
+  fetchPriority,
+  sizes,
 }) => {
   const candidates = useMemo(() => {
     if (src) {
@@ -41,6 +45,10 @@ const ProductImage = ({
         src={currentSrc}
         alt={alt}
         onError={handleError}
+        loading={loading}
+        decoding={decoding}
+        fetchPriority={fetchPriority}
+        sizes={sizes}
         className={`${className} ${imgClassName}`.trim()}
       />
     </div>

@@ -51,17 +51,17 @@ const ResetPassword = () => {
     <div className="flex min-h-screen flex-col bg-vintage-100">
       <Navbar />
 
-      <div className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 items-center justify-center px-4 py-8 sm:p-4">
         <div className="w-full max-w-md">
-          <div className="overflow-hidden rounded-3xl border border-vintage-200 bg-white shadow-xl">
-            <div className="p-8 md:p-12">
+          <div className="overflow-hidden rounded-2xl border border-vintage-200 bg-white shadow-xl sm:rounded-3xl">
+            <div className="p-5 sm:p-8 md:p-12">
               <Link to="/login" className="mb-8 inline-flex items-center text-sm font-bold text-vintage-600 hover:text-primary">
                 <ArrowLeft size={18} className="mr-2 rtl:rotate-180" />
                 {t.back}
               </Link>
 
               <div className="mb-8">
-                <h1 className="mb-3 text-3xl font-bold text-vintage-900">{t.title}</h1>
+                <h1 className="mb-3 text-2xl font-black text-vintage-900 sm:text-3xl">{t.title}</h1>
                 <p className="text-vintage-500">{t.subtitle}</p>
               </div>
 

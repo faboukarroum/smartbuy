@@ -15,7 +15,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [apiError, setApiError] = React.useState('');
-  const { language } = usePreferencesStore();
+  const { language, currency, usdToLbpRate } = usePreferencesStore();
 
   const t = {
     emptyBag: language === 'ar' ? 'السلّة فاضية.' : 'Your bag is empty.',
@@ -59,10 +59,10 @@ const Checkout = () => {
   }`;
 
   const subtotal = items.reduce((acc, item) => {
-    const price = getDisplayPrice(item, 'USD');
+    const price = getDisplayPrice(item, currency, usdToLbpRate);
     return price.hasPrice ? acc + price.value * item.quantity : acc;
   }, 0);
-  const hasPricedItems = items.some((item) => getDisplayPrice(item, 'USD').hasPrice);
+  const hasPricedItems = items.some((item) => getDisplayPrice(item, currency, usdToLbpRate).hasPrice);
 
   const onSubmit = async (data) => {
     if (items.length === 0) {
@@ -193,7 +193,7 @@ const Checkout = () => {
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.deliveryNote}</label>
                   <textarea
-                    {...register('deliveryNote', { required: t.required })}
+                    {...register('deliveryNote')}
                     rows={3}
                     placeholder={t.deliveryPlaceholder}
                     autoComplete="off"
@@ -240,11 +240,11 @@ const Checkout = () => {
 
               <div className="mb-8 max-h-64 space-y-4 overflow-y-auto pr-2">
                 {items.map((item) => {
-                  const linePrice = getLineItemPrice(item, 'USD');
+                  const linePrice = getLineItemPrice(item, currency, usdToLbpRate);
                   return (
                     <div key={item._id || item.id} className="flex gap-4">
                       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-vintage-50">
-                        <ProductImage product={item} alt={item.name} className="h-full w-full object-cover" />
+                        <ProductImage product={item} alt={item.name} className="h-full w-full object-cover" sizes="4rem" />
                       </div>
                       <div className="flex-1">
                         <h4 className="text-sm font-medium text-vintage-900">{item.name}</h4>
@@ -259,7 +259,7 @@ const Checkout = () => {
               <div className="mb-8 space-y-4 border-t border-vintage-100 pt-6">
                 <div className="flex justify-between text-vintage-600">
                   <span>{t.subtotal}</span>
-                  <span>{hasPricedItems ? formatCurrency(subtotal, 'USD') : 'Call for cost'}</span>
+                  <span>{hasPricedItems ? formatCurrency(subtotal, currency) : 'Call for cost'}</span>
                 </div>
                 <div className="flex justify-between text-vintage-600">
                   <span>{t.delivery}</span>

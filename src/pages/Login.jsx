@@ -79,12 +79,12 @@ const Login = () => {
     <div className="flex min-h-screen flex-col bg-vintage-100">
       <Navbar />
 
-      <div className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 items-center justify-center px-4 py-8 sm:p-4">
         <div className="w-full max-w-md">
-          <div className="overflow-hidden rounded-3xl border border-vintage-200 bg-white shadow-xl">
-            <div className="p-8 md:p-12">
-              <div className="mb-10 text-center">
-                <h1 className="mb-2 text-3xl font-bold text-vintage-900">{t.title}</h1>
+          <div className="overflow-hidden rounded-2xl border border-vintage-200 bg-white shadow-xl sm:rounded-3xl">
+            <div className="p-5 sm:p-8 md:p-12">
+              <div className="mb-8 text-center sm:mb-10">
+                <h1 className="mb-2 text-2xl font-black text-vintage-900 sm:text-3xl">{t.title}</h1>
                 <p className="text-vintage-500">{t.subtitle}</p>
               </div>
 
@@ -95,7 +95,7 @@ const Login = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-vintage-700">{t.email}</label>
                   <div className="relative">
@@ -146,7 +146,7 @@ const Login = () => {
                 </button>
               </form>
 
-              <div className="relative my-8">
+              <div className="relative my-6 sm:my-8">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-vintage-200"></div>
                 </div>
@@ -158,7 +158,7 @@ const Login = () => {
               <GoogleLoginButton label={t.googleSetup} onCredential={handleGoogleCredential} disabled={loading} />
             </div>
 
-            <div className="border-t border-vintage-200 bg-vintage-50 p-6 text-center">
+            <div className="border-t border-vintage-200 bg-vintage-50 p-5 text-center sm:p-6">
               <p className="text-sm text-vintage-600">
                 {t.noAccount} <Link to="/register" className="font-bold text-primary hover:underline">{t.create}</Link>
               </p>

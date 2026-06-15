@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, ChevronLeft, ChevronRight, Filter, Loader2, Search, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { AlertCircle, ChevronLeft, ChevronRight, Filter, Search, SlidersHorizontal } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
@@ -9,6 +10,8 @@ const categories = ['All', 'tools', 'kitchen', 'decor', 'bedding', 'furniture', 
 const pageSizes = [20, 50, 100];
 
 const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchInputRef = React.useRef(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,6 +46,21 @@ const Products = () => {
     items: language === 'ar' ? 'منتج' : 'items',
     page: language === 'ar' ? 'صفحة' : 'Page',
   };
+
+  const shouldFocusSearch = searchParams.get('focus') === 'search';
+
+  useEffect(() => {
+    if (!shouldFocusSearch) {
+      return;
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      searchInputRef.current?.focus();
+      setSearchParams({}, { replace: true });
+    }, 120);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [shouldFocusSearch, setSearchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -82,6 +100,25 @@ const Products = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const ProductGridSkeleton = () => (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" aria-label={t.loading}>
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className="overflow-hidden rounded-2xl border border-vintage-200 bg-white shadow-sm">
+          <div className="aspect-[4/5] animate-pulse bg-vintage-200" />
+          <div className="space-y-3 p-3 sm:p-4">
+            <div className="h-3 w-20 rounded-full bg-vintage-200" />
+            <div className="h-4 w-full rounded-full bg-vintage-200" />
+            <div className="h-4 w-3/4 rounded-full bg-vintage-200" />
+            <div className="flex items-center justify-between">
+              <div className="h-6 w-24 rounded-full bg-vintage-200" />
+              <div className="h-11 w-11 rounded-full bg-vintage-200 md:hidden" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-vintage-50">
       <Navbar />
@@ -118,6 +155,7 @@ const Products = () => {
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-vintage-500 rtl:left-auto rtl:right-4" size={18} />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder={t.search}
                 value={searchQuery}
@@ -164,10 +202,7 @@ const Products = () => {
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 text-vintage-400">
-            <Loader2 className="mb-4 animate-spin" size={48} />
-            <p className="text-lg font-bold">{t.loading}</p>
-          </div>
+          <ProductGridSkeleton />
         ) : error ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-red-50 p-6 py-20 text-red-500 sm:rounded-3xl sm:p-8 sm:py-24">
             <AlertCircle className="mb-4" size={48} />
@@ -205,7 +240,8 @@ const Products = () => {
               <button
                 onClick={() => paginate(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-vintage-200 text-vintage-700 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-vintage-200 bg-white text-vintage-700 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Previous page"
               >
                 <ChevronLeft size={20} className="rtl:rotate-180" />
               </button>
@@ -219,7 +255,7 @@ const Products = () => {
                       <button
                         key={pageNum}
                         onClick={() => paginate(pageNum)}
-                        className={`flex h-10 w-10 items-center justify-center rounded-full font-black transition-all ${
+                        className={`flex h-11 w-11 items-center justify-center rounded-full font-black transition-all ${
                           currentPage === pageNum
                             ? 'scale-110 bg-vintage-900 text-white shadow-lg'
                             : 'border border-vintage-200 bg-white text-vintage-700 hover:border-primary hover:text-primary'
@@ -241,7 +277,8 @@ const Products = () => {
               <button
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-vintage-200 text-vintage-700 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-vintage-200 bg-white text-vintage-700 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Next page"
               >
                 <ChevronRight size={20} className="rtl:rotate-180" />
               </button>

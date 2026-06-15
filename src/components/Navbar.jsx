@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, Menu, X, Truck } from 'lucide-react';
+import { CircleDollarSign, Languages, ShoppingCart, User, Search, Menu, X, Truck } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import usePreferencesStore from '../store/preferencesStore';
@@ -57,7 +57,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <button
-            onClick={() => navigate('/products')}
+            onClick={() => navigate('/products?focus=search')}
             className="flex h-11 w-11 items-center justify-center text-vintage-900 transition-colors hover:text-primary"
             aria-label="Search products"
           >
@@ -66,18 +66,30 @@ const Navbar = () => {
 
           <button
             onClick={toggleCurrency}
-            className="hidden rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-extrabold text-vintage-900 shadow-sm hover:border-primary hover:text-primary sm:inline-flex"
-            aria-label="Toggle currency"
+            className="group hidden min-h-11 items-center gap-2 rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/25 sm:inline-flex"
+            aria-label={`Toggle currency, current currency ${currency}`}
           >
-            {currency}
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+              <CircleDollarSign size={16} />
+            </span>
+            <span className="leading-none">
+              <span className="block text-[10px] font-black uppercase text-vintage-500">Currency</span>
+              <span className="block text-xs font-black text-vintage-900">{currency}</span>
+            </span>
           </button>
 
           <button
             onClick={toggleLanguage}
-            className="hidden rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-xs font-extrabold text-vintage-900 shadow-sm hover:border-primary hover:text-primary sm:inline-flex"
-            aria-label="Toggle language"
+            className="group hidden min-h-11 items-center gap-2 rounded-full border border-vintage-200 bg-white px-3 py-1.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/25 sm:inline-flex"
+            aria-label={`Toggle language, current language ${language === 'en' ? 'English' : 'Arabic'}`}
           >
-            {labels.language}
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/15 text-vintage-900 transition-colors group-hover:bg-secondary">
+              <Languages size={16} />
+            </span>
+            <span className="leading-none">
+              <span className="block text-[10px] font-black uppercase text-vintage-500">Language</span>
+              <span className="block text-xs font-black text-vintage-900">{language === 'en' ? 'EN' : 'AR'}</span>
+            </span>
           </button>
 
           <Link to="/cart" className="relative flex h-11 w-11 items-center justify-center text-vintage-900 transition-colors hover:text-primary" aria-label={labels.cart}>
@@ -117,14 +129,14 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-x-0 top-[84px] z-40 sm:top-[116px] md:hidden">
+        <div className="absolute inset-x-0 top-full z-40 md:hidden">
           <button
             type="button"
-            className="fixed inset-x-0 bottom-0 top-[84px] -z-10 bg-vintage-900/35 backdrop-blur-[2px] sm:top-[116px]"
+            className="fixed inset-0 -z-10 bg-vintage-900/35 backdrop-blur-[2px]"
             onClick={() => setIsOpen(false)}
             aria-label="Close menu"
           />
-          <div id="mobile-menu" className="mx-3 max-h-[calc(100vh-100px)] overflow-y-auto rounded-b-3xl border border-t-0 border-vintage-200 bg-white px-4 py-5 shadow-2xl shadow-vintage-900/20 sm:max-h-[calc(100vh-132px)]">
+          <div id="mobile-menu" className="mx-3 max-h-[calc(100vh-96px)] overflow-y-auto rounded-b-3xl border border-t-0 border-vintage-200 bg-white px-4 py-5 shadow-2xl shadow-vintage-900/20 sm:max-h-[calc(100vh-128px)]">
             <div className="space-y-2">
               <NavLink
                 to="/"
