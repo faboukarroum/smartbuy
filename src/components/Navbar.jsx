@@ -16,6 +16,7 @@ const Navbar = () => {
 
   const labels = {
     promo: language === 'ar' ? 'توصيل أرامكس لكل لبنان | دفع عند الاستلام' : 'Aramex delivery across Lebanon | Cash on delivery',
+    promoMobile: language === 'ar' ? 'توصيل لكل لبنان | دفع عند الاستلام' : 'Lebanon delivery | Cash on delivery',
     home: language === 'ar' ? 'الرئيسية' : 'Home',
     shop: language === 'ar' ? 'تسوق' : 'Shop',
     login: language === 'ar' ? 'تسجيل الدخول' : 'Login',
@@ -33,10 +34,11 @@ const Navbar = () => {
 
   return (
     <nav className="vintage-glass sticky top-0 z-50">
-      <div className="brand-dark-section px-4 py-2 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-xs font-bold uppercase tracking-wide sm:text-sm">
-          <Truck size={16} className="text-secondary" />
-          <span>{labels.promo}</span>
+      <div className="brand-dark-section px-3 py-1.5 text-white sm:px-4 sm:py-2">
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-1.5 text-center text-[11px] font-bold uppercase leading-tight tracking-wide sm:gap-2 sm:text-sm">
+          <Truck size={14} className="shrink-0 text-secondary sm:size-4" />
+          <span className="sm:hidden">{labels.promoMobile}</span>
+          <span className="hidden sm:inline">{labels.promo}</span>
         </div>
       </div>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
