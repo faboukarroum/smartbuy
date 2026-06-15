@@ -66,21 +66,30 @@ const Cart = () => {
                       </div>
 
                       <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center rounded-full border border-vintage-200 bg-vintage-50 px-1">
-                          <button onClick={() => updateQuantity(itemId, Math.max(1, item.quantity - 1))} className="flex h-9 w-9 items-center justify-center text-vintage-700 hover:text-primary">
+                        <div className="flex min-h-11 items-center rounded-full border border-vintage-200 bg-vintage-50 px-1">
+                          <button
+                            onClick={() => updateQuantity(itemId, Math.max(1, item.quantity - 1))}
+                            className="flex h-11 w-11 items-center justify-center text-vintage-700 hover:text-primary"
+                            aria-label={`Decrease quantity for ${item.name}`}
+                          >
                             <Minus size={16} />
                           </button>
-                          <span className="w-9 text-center font-black text-vintage-900">{item.quantity}</span>
+                          <span className="w-10 text-center font-black text-vintage-900">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(itemId, Math.min(maxQty, item.quantity + 1))}
                             disabled={item.quantity >= maxQty}
-                            className="flex h-9 w-9 items-center justify-center text-vintage-700 hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                            className="flex h-11 w-11 items-center justify-center text-vintage-700 hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                            aria-label={`Increase quantity for ${item.name}`}
                           >
                             <Plus size={16} />
                           </button>
                         </div>
 
-                        <button onClick={() => removeFromCart(itemId)} className="flex items-center gap-2 text-sm font-bold text-vintage-500 transition-colors hover:text-red-500">
+                        <button
+                          onClick={() => removeFromCart(itemId)}
+                          className="flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-bold text-vintage-500 transition-colors hover:bg-red-50 hover:text-red-500"
+                          aria-label={`Remove ${item.name} from cart`}
+                        >
                           <Trash2 size={18} />
                           {t.remove}
                         </button>
@@ -90,7 +99,7 @@ const Cart = () => {
                 );
               })}
 
-              <button onClick={clearCart} className="font-bold text-vintage-600 underline underline-offset-4 hover:text-primary">
+              <button onClick={clearCart} className="min-h-11 rounded-full px-1 font-bold text-vintage-600 underline underline-offset-4 hover:text-primary">
                 {t.clear}
               </button>
             </div>
