@@ -91,3 +91,16 @@ export const getLineItemPrice = (item, preferredCurrency = 'USD', usdToLbpRate =
     label: formatCurrency(displayPrice.value * (item.quantity || 1), displayPrice.currency),
   };
 };
+
+export const getCartUsdSubtotal = (items = []) =>
+  items.reduce((sum, item) => {
+    const usdPrice = getProductPrices(item).USD;
+    return usdPrice !== null ? sum + usdPrice * (item.quantity || 1) : sum;
+  }, 0);
+
+export const getApproxLbpAmount = (usdAmount, usdToLbpRate = DEFAULT_USD_TO_LBP_RATE) => {
+  const amount = Number(usdAmount || 0);
+  const rate = Number(usdToLbpRate || DEFAULT_USD_TO_LBP_RATE);
+
+  return Number.isFinite(amount) && Number.isFinite(rate) ? amount * rate : 0;
+};

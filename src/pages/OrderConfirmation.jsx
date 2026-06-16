@@ -28,8 +28,9 @@ const OrderConfirmation = () => {
   const { user } = useAuthStore();
   const { language } = usePreferencesStore();
   const [order, setOrder] = React.useState(location.state?.order || null);
-  const [loading, setLoading] = React.useState(!location.state?.order);
+  const [loading, setLoading] = React.useState(Boolean(!location.state?.order && id && receiptToken));
   const [error, setError] = React.useState('');
+  const canFetchReceipt = Boolean(id && receiptToken);
 
   const t = {
     title: language === 'ar' ? 'وصلنا طلبك!' : 'Order received',
@@ -52,31 +53,39 @@ const OrderConfirmation = () => {
     shopMore: language === 'ar' ? 'كمل تسوق' : 'Continue shopping',
     loading: language === 'ar' ? 'عم نحمّل الإيصال...' : 'Loading receipt...',
     missing: language === 'ar' ? 'ما لقينا هالإيصال.' : 'Receipt could not be found.',
+    retry: language === 'ar' ? 'جرّب مرة تانية' : 'Try again',
     noEmail: language === 'ar' ? 'ما في إيميل' : 'No email provided',
     noPhone: language === 'ar' ? 'ما في رقم هاتف' : 'No phone provided',
     free: language === 'ar' ? 'عبر أرامكس' : 'Via Aramex',
   };
 
-  React.useEffect(() => {
-    if (order || !id || !receiptToken) {
+  const fetchReceipt = React.useCallback(async () => {
+    if (order) {
+      setLoading(false);
       return;
     }
 
-    const fetchReceipt = async () => {
-      try {
-        setLoading(true);
-        const { data } = await getOrderReceipt(id, receiptToken);
-        setOrder(data);
-        setError('');
-      } catch (err) {
-        setError(err.response?.data?.message || t.missing);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!canFetchReceipt) {
+      setError(t.missing);
+      setLoading(false);
+      return;
+    }
 
+    try {
+      setLoading(true);
+      setError('');
+      const { data } = await getOrderReceipt(id, receiptToken);
+      setOrder(data);
+    } catch (err) {
+      setError(err.response?.data?.message || t.missing);
+    } finally {
+      setLoading(false);
+    }
+  }, [canFetchReceipt, id, order, receiptToken, t.missing]);
+
+  React.useEffect(() => {
     fetchReceipt();
-  }, [id, receiptToken, order, t.missing]);
+  }, [fetchReceipt]);
 
   if (loading) {
     return (
@@ -98,10 +107,21 @@ const OrderConfirmation = () => {
           <div className="rounded-2xl border border-red-100 bg-white p-6 text-center shadow-sm sm:rounded-3xl sm:p-10">
             <AlertCircle className="mx-auto mb-4 text-red-500" size={44} />
             <h1 className="mb-3 text-3xl font-black text-vintage-900">{t.missing}</h1>
-            <p className="mb-8 text-vintage-600">{error}</p>
-            <Link to="/products" className="vintage-button inline-flex !px-8 !py-3 font-black">
-              {t.shopMore}
-            </Link>
+            <p className="mb-8 text-vintage-600">{error || t.missing}</p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {canFetchReceipt && (
+                <button
+                  type="button"
+                  onClick={fetchReceipt}
+                  className="inline-flex min-h-11 items-center rounded-full border border-vintage-200 bg-white px-8 py-3 font-black text-vintage-900 transition-colors hover:border-primary hover:text-primary"
+                >
+                  {t.retry}
+                </button>
+              )}
+              <Link to="/products" className="vintage-button inline-flex !px-8 !py-3 font-black">
+                {t.shopMore}
+              </Link>
+            </div>
           </div>
         </main>
       </div>

@@ -33,6 +33,8 @@ const useCartStore = create(
         items: state.items.filter((item) => (item._id || item.id) !== productId),
       })),
 
+      syncItems: (items) => set({ items }),
+
       updateQuantity: (productId, quantity) => set((state) => ({
         items: state.items.map((item) => {
           if ((item._id || item.id) !== productId) {

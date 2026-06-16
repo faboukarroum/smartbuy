@@ -6,11 +6,19 @@ import Navbar from '../components/Navbar';
 import useCartStore from '../store/cartStore';
 import ProductImage from '../components/ProductImage';
 import usePreferencesStore from '../store/preferencesStore';
-import { getDisplayPrice, getLineItemPrice, formatCurrency } from '../utils/pricing';
+import {
+  formatCurrency,
+  getApproxLbpAmount,
+  getCartUsdSubtotal,
+  getDisplayPrice,
+  getLineItemPrice,
+} from '../utils/pricing';
+import { syncCartWithLatestProducts } from '../utils/cartSync';
+import { isValidEmail, isValidPhone, normalizeEmail, normalizePhone } from '../utils/validation';
 import { createOrder } from '../api/products';
 
 const Checkout = () => {
-  const { items, clearCart } = useCartStore();
+  const { items, clearCart, syncItems } = useCartStore();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -58,11 +66,20 @@ const Checkout = () => {
     hasError ? 'border-red-300 ring-2 ring-red-100' : 'border-vintage-200'
   }`;
 
-  const subtotal = items.reduce((acc, item) => {
-    const price = getDisplayPrice(item, currency, usdToLbpRate);
-    return price.hasPrice ? acc + price.value * item.quantity : acc;
-  }, 0);
-  const hasPricedItems = items.some((item) => getDisplayPrice(item, currency, usdToLbpRate).hasPrice);
+  const subtotalUsd = getCartUsdSubtotal(items);
+  const approxLbpSubtotal = getApproxLbpAmount(subtotalUsd, usdToLbpRate);
+  const hasPricedItems = items.some((item) => getDisplayPrice(item, 'USD', usdToLbpRate).hasPrice);
+  const showApproxLbp = currency === 'LBP' && hasPricedItems;
+  const cartSyncedMessage =
+    language === 'ar'
+      ? 'حدّثنا السلة حسب المخزون والأسعار الحالية. راجعها وثبّت الطلب مرة تانية.'
+      : 'We updated your bag with current stock and prices. Please review it and place the order again.';
+  const cartSyncedEmptyMessage =
+    language === 'ar'
+      ? 'حدّثنا السلة، بس ما في أي منتج متوفر حالياً.'
+      : 'We updated your bag, but no items are currently available.';
+  const invalidPhoneMessage = language === 'ar' ? 'اكتب رقم هاتف صحيح' : 'Enter a valid phone number';
+  const requiredTrimmed = (value) => (value || '').trim() ? true : t.required;
 
   const onSubmit = async (data) => {
     if (items.length === 0) {
@@ -73,22 +90,37 @@ const Checkout = () => {
     try {
       setIsSubmitting(true);
       setApiError('');
+      const normalizedForm = {
+        fullName: (data.fullName || '').trim(),
+        phone: normalizePhone(data.phone || ''),
+        email: normalizeEmail(data.email || ''),
+        address: (data.address || '').trim(),
+        city: (data.city || '').trim(),
+        deliveryNote: (data.deliveryNote || '').trim(),
+      };
+      const syncedCart = await syncCartWithLatestProducts(items);
+      syncItems(syncedCart.items);
+
+      if (syncedCart.changes.length > 0) {
+        setApiError(syncedCart.items.length > 0 ? cartSyncedMessage : cartSyncedEmptyMessage);
+        return;
+      }
 
       const response = await createOrder({
-        orderItems: items.map((item) => ({
+        orderItems: syncedCart.items.map((item) => ({
           product: item._id || item.id,
           qty: item.quantity,
         })),
         guestCustomer: {
-          fullName: data.fullName,
-          phone: data.phone,
-          email: data.email || '',
+          fullName: normalizedForm.fullName,
+          phone: normalizedForm.phone,
+          email: normalizedForm.email,
         },
         shippingAddress: {
-          fullName: data.fullName,
-          address: data.address,
-          city: data.city,
-          deliveryNote: data.deliveryNote,
+          fullName: normalizedForm.fullName,
+          address: normalizedForm.address,
+          city: normalizedForm.city,
+          deliveryNote: normalizedForm.deliveryNote,
         },
         paymentMethod: 'Cash on Delivery',
       });
@@ -127,7 +159,7 @@ const Checkout = () => {
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.fullName}</label>
                   <input
-                    {...register('fullName', { required: t.required })}
+                    {...register('fullName', { validate: requiredTrimmed })}
                     autoComplete="name"
                     className={fieldClassName(errors.fullName)}
                     aria-invalid={errors.fullName ? 'true' : 'false'}
@@ -137,7 +169,10 @@ const Checkout = () => {
                 <div>
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.phone}</label>
                   <input
-                    {...register('phone', { required: t.required })}
+                    {...register('phone', {
+                      required: t.required,
+                      validate: (value) => isValidPhone(value) || invalidPhoneMessage,
+                    })}
                     type="tel"
                     inputMode="tel"
                     autoComplete="tel"
@@ -155,10 +190,7 @@ const Checkout = () => {
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.email}</label>
                   <input
                     {...register('email', {
-                      pattern: {
-                        value: /^\S+@\S+\.\S+$/,
-                        message: t.invalidEmail,
-                      },
+                      validate: (value) => isValidEmail(value || '') || t.invalidEmail,
                     })}
                     type="email"
                     inputMode="email"
@@ -171,7 +203,7 @@ const Checkout = () => {
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.address}</label>
                   <input
-                    {...register('address', { required: t.required })}
+                    {...register('address', { validate: requiredTrimmed })}
                     autoComplete="street-address"
                     placeholder={t.addressPlaceholder}
                     className={fieldClassName(errors.address)}
@@ -182,7 +214,7 @@ const Checkout = () => {
                 <div>
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.city}</label>
                   <input
-                    {...register('city', { required: t.required })}
+                    {...register('city', { validate: requiredTrimmed })}
                     autoComplete="address-level2"
                     placeholder={t.cityPlaceholder}
                     className={fieldClassName(errors.city)}
@@ -193,7 +225,7 @@ const Checkout = () => {
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.deliveryNote}</label>
                   <textarea
-                    {...register('deliveryNote')}
+                    {...register('deliveryNote', { validate: requiredTrimmed })}
                     rows={3}
                     placeholder={t.deliveryPlaceholder}
                     autoComplete="off"
@@ -240,7 +272,7 @@ const Checkout = () => {
 
               <div className="mb-8 max-h-64 space-y-4 overflow-y-auto pr-2">
                 {items.map((item) => {
-                  const linePrice = getLineItemPrice(item, currency, usdToLbpRate);
+                  const linePrice = getLineItemPrice(item, 'USD', usdToLbpRate);
                   return (
                     <div key={item._id || item.id} className="flex gap-4">
                       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-vintage-50">
@@ -259,7 +291,14 @@ const Checkout = () => {
               <div className="mb-8 space-y-4 border-t border-vintage-100 pt-6">
                 <div className="flex justify-between text-vintage-600">
                   <span>{t.subtotal}</span>
-                  <span>{hasPricedItems ? formatCurrency(subtotal, currency) : 'Call for cost'}</span>
+                  <span className="text-right">
+                    <span className="block">{hasPricedItems ? formatCurrency(subtotalUsd, 'USD') : 'Call for cost'}</span>
+                    {showApproxLbp && (
+                      <span className="mt-1 block text-xs font-bold text-vintage-400">
+                        {language === 'ar' ? 'تقريباً' : 'Approx.'} {formatCurrency(approxLbpSubtotal, 'LBP')}
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between text-vintage-600">
                   <span>{t.delivery}</span>

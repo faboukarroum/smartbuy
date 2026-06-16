@@ -20,56 +20,58 @@ const Profile = () => {
   const [profileError, setProfileError] = React.useState('');
   const [profileNotice, setProfileNotice] = React.useState('');
 
-  React.useEffect(() => {
+  const fetchProfile = React.useCallback(async () => {
     if (!user) {
+      setProfileLoading(false);
       return;
     }
 
-    const fetchProfile = async () => {
-      try {
-        setProfileLoading(true);
-        const { data } = await getUserProfile();
-        setProfileForm({
-          name: data.name || '',
-          email: data.email || '',
-          password: '',
-        });
-        setProfileError('');
-      } catch {
-        setProfileForm({
-          name: user.name || '',
-          email: user.email || '',
-          password: '',
-        });
-        setProfileError('Profile details could not be refreshed. You can still edit your saved account details.');
-      } finally {
-        setProfileLoading(false);
-      }
-    };
+    try {
+      setProfileLoading(true);
+      const { data } = await getUserProfile();
+      setProfileForm({
+        name: data.name || '',
+        email: data.email || '',
+        password: '',
+      });
+      setProfileError('');
+    } catch {
+      setProfileForm({
+        name: user.name || '',
+        email: user.email || '',
+        password: '',
+      });
+      setProfileError('Profile details could not be refreshed. You can still edit your saved account details.');
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [user]);
 
+  React.useEffect(() => {
     fetchProfile();
-  }, [user]);
+  }, [fetchProfile]);
 
-  React.useEffect(() => {
+  const fetchOrders = React.useCallback(async () => {
     if (!user) {
+      setLoading(false);
       return;
     }
 
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const { data } = await getMyOrders();
-        setOrders(Array.isArray(data) ? data : []);
-        setError('');
-      } catch {
-        setError('Order history is unavailable right now.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
+    try {
+      setLoading(true);
+      const { data } = await getMyOrders();
+      setOrders(Array.isArray(data) ? data : []);
+      setError('');
+    } catch {
+      setError('Order history is unavailable right now.');
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
+
+  React.useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
@@ -149,9 +151,19 @@ const Profile = () => {
           )}
 
           {profileError && (
-            <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800">
-              <AlertCircle size={18} />
-              {profileError}
+            <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} />
+                <span>{profileError}</span>
+              </div>
+              <button
+                type="button"
+                onClick={fetchProfile}
+                disabled={profileLoading}
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-300 bg-white px-4 text-sm font-black text-amber-900 transition-colors hover:border-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {profileLoading ? <Loader2 className="animate-spin" size={16} /> : 'Try again'}
+              </button>
             </div>
           )}
 
@@ -224,9 +236,19 @@ const Profile = () => {
               <p className="font-bold">Loading orders...</p>
             </div>
           ) : error ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800">
-              <AlertCircle size={18} />
-              {error}
+            <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} />
+                <span>{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={fetchOrders}
+                disabled={loading}
+                className="inline-flex min-h-10 items-center justify-center rounded-full border border-amber-300 bg-white px-4 text-sm font-black text-amber-900 transition-colors hover:border-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : 'Try again'}
+              </button>
             </div>
           ) : orders.length === 0 ? (
             <div className="py-16 text-center text-vintage-500">
