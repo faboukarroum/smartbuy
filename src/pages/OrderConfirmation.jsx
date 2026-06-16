@@ -5,22 +5,9 @@ import Navbar from '../components/Navbar';
 import ProductImage from '../components/ProductImage';
 import useAuthStore from '../store/authStore';
 import usePreferencesStore from '../store/preferencesStore';
-import { getOrderReceipt } from '../api/products';
+import { getOrderById, getOrderReceipt } from '../api/products';
+import { getFulfillmentLabel } from '../utils/orders';
 import { formatCurrency } from '../utils/pricing';
-
-const getFulfillmentLabel = (order, language) => {
-  const status = order?.fulfillmentStatus || (order?.isDelivered ? 'delivered' : 'ready_for_pickup');
-
-  if (status === 'delivered') {
-    return language === 'ar' ? 'تم التوصيل' : 'Delivered';
-  }
-
-  if (status === 'picked_up') {
-    return language === 'ar' ? 'مع شركة التوصيل' : 'Picked up by delivery company';
-  }
-
-  return language === 'ar' ? 'جاهز للاستلام من شركة التوصيل' : 'Ready for pickup';
-};
 
 const OrderConfirmation = () => {
   const { id, receiptToken } = useParams();
@@ -28,15 +15,22 @@ const OrderConfirmation = () => {
   const { user } = useAuthStore();
   const { language } = usePreferencesStore();
   const [order, setOrder] = React.useState(location.state?.order || null);
-  const [loading, setLoading] = React.useState(Boolean(!location.state?.order && id && receiptToken));
+  const [loading, setLoading] = React.useState(Boolean(!location.state?.order && id));
   const [error, setError] = React.useState('');
   const canFetchReceipt = Boolean(id && receiptToken);
+  const canFetchPrivateOrder = Boolean(id && !receiptToken && user);
+  const canRetry = canFetchReceipt || canFetchPrivateOrder;
+  const isReceipt = Boolean(receiptToken);
 
   const t = {
     title: language === 'ar' ? 'وصلنا طلبك!' : 'Order received',
+    detailsTitle: language === 'ar' ? 'تفاصيل الطلب' : 'Order details',
     intro: language === 'ar'
       ? 'شكراً لطلبك. رح نتواصل معك لتأكيد التفاصيل والتوصيل عبر أرامكس.'
       : 'Thank you for your order. We will contact you to confirm details and Aramex delivery.',
+    detailsIntro: language === 'ar'
+      ? 'راجع حالة الطلب، معلومات التوصيل، والأغراض.'
+      : 'Review your order status, delivery details, and items.',
     orderId: language === 'ar' ? 'رقم الطلب' : 'Order ID',
     status: language === 'ar' ? 'الحالة' : 'Status',
     payment: language === 'ar' ? 'الدفع' : 'Payment',
@@ -57,6 +51,7 @@ const OrderConfirmation = () => {
     noEmail: language === 'ar' ? 'ما في إيميل' : 'No email provided',
     noPhone: language === 'ar' ? 'ما في رقم هاتف' : 'No phone provided',
     free: language === 'ar' ? 'عبر أرامكس' : 'Via Aramex',
+    paid: language === 'ar' ? 'مدفوع' : 'Paid',
   };
 
   const fetchReceipt = React.useCallback(async () => {
@@ -65,7 +60,7 @@ const OrderConfirmation = () => {
       return;
     }
 
-    if (!canFetchReceipt) {
+    if (!canFetchReceipt && !canFetchPrivateOrder) {
       setError(t.missing);
       setLoading(false);
       return;
@@ -74,14 +69,16 @@ const OrderConfirmation = () => {
     try {
       setLoading(true);
       setError('');
-      const { data } = await getOrderReceipt(id, receiptToken);
+      const { data } = canFetchReceipt
+        ? await getOrderReceipt(id, receiptToken)
+        : await getOrderById(id);
       setOrder(data);
     } catch (err) {
       setError(err.response?.data?.message || t.missing);
     } finally {
       setLoading(false);
     }
-  }, [canFetchReceipt, id, order, receiptToken, t.missing]);
+  }, [canFetchPrivateOrder, canFetchReceipt, id, order, receiptToken, t.missing]);
 
   React.useEffect(() => {
     fetchReceipt();
@@ -109,7 +106,7 @@ const OrderConfirmation = () => {
             <h1 className="mb-3 text-3xl font-black text-vintage-900">{t.missing}</h1>
             <p className="mb-8 text-vintage-600">{error || t.missing}</p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              {canFetchReceipt && (
+              {canRetry && (
                 <button
                   type="button"
                   onClick={fetchReceipt}
@@ -145,8 +142,8 @@ const OrderConfirmation = () => {
               </div>
               <div>
                 <p className="mb-2 text-sm font-black uppercase tracking-wide text-primary">{t.orderId}: #{order._id?.slice(-8)}</p>
-                <h1 className="text-3xl font-black text-vintage-900 sm:text-4xl">{t.title}</h1>
-                <p className="mt-3 max-w-2xl text-vintage-600">{t.intro}</p>
+                <h1 className="text-3xl font-black text-vintage-900 sm:text-4xl">{isReceipt ? t.title : t.detailsTitle}</h1>
+                <p className="mt-3 max-w-2xl text-vintage-600">{isReceipt ? t.intro : t.detailsIntro}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -173,7 +170,7 @@ const OrderConfirmation = () => {
               </div>
               <div className="rounded-2xl border border-vintage-200 bg-white p-5">
                 <p className="text-xs font-black uppercase tracking-wide text-vintage-500">{t.payment}</p>
-                <p className="mt-2 font-black text-vintage-900">{order.isPaid ? 'COD collected' : t.codPending}</p>
+                <p className="mt-2 font-black text-vintage-900">{order.isPaid ? t.paid : t.codPending}</p>
               </div>
               <div className="rounded-2xl border border-vintage-200 bg-white p-5">
                 <p className="text-xs font-black uppercase tracking-wide text-vintage-500">{t.total}</p>

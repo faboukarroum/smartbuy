@@ -51,6 +51,11 @@ export const getOrderReceipt = (id, receiptToken) => {
   return axios.get(`${API_BASE_URL}/orders/${id}/receipt/${receiptToken}`);
 };
 
+export const getOrderById = (id) => {
+  const config = getAuthConfig();
+  return axios.get(`${API_BASE_URL}/orders/${id}`, config);
+};
+
 export const getOrders = () => {
   const config = getAuthConfig();
   return axios.get(`${API_BASE_URL}/orders`, config);

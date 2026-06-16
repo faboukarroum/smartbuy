@@ -26,6 +26,7 @@ const router = createBrowserRouter([
   { path: '/cart', element: <Cart /> },
   { path: '/checkout', element: <Checkout /> },
   { path: '/order-confirmation/:id/:receiptToken', element: <OrderConfirmation /> },
+  { path: '/orders/:id', element: <ProtectedRoute requireAdmin={false}><OrderConfirmation /></ProtectedRoute> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
   { path: '/forgot-password', element: <ForgotPassword /> },

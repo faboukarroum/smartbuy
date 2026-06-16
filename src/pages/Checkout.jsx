@@ -5,6 +5,7 @@ import { AlertCircle, ArrowLeft, CreditCard, Loader2, ShieldCheck, Truck } from 
 import Navbar from '../components/Navbar';
 import useCartStore from '../store/cartStore';
 import ProductImage from '../components/ProductImage';
+import useAuthStore from '../store/authStore';
 import usePreferencesStore from '../store/preferencesStore';
 import {
   formatCurrency,
@@ -15,14 +16,21 @@ import {
 } from '../utils/pricing';
 import { syncCartWithLatestProducts } from '../utils/cartSync';
 import { isValidEmail, isValidPhone, normalizeEmail, normalizePhone } from '../utils/validation';
-import { createOrder } from '../api/products';
+import { createOrder, getMyOrders, getUserProfile } from '../api/products';
 
 const Checkout = () => {
   const { items, clearCart, syncItems } = useCartStore();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { user } = useAuthStore();
+  const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm({
+    defaultValues: {
+      fullName: user?.name || '',
+      email: user?.email || '',
+    },
+  });
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [apiError, setApiError] = React.useState('');
+  const clientOrderTokenRef = React.useRef('');
   const { language, currency, usdToLbpRate } = usePreferencesStore();
 
   const t = {
@@ -81,7 +89,71 @@ const Checkout = () => {
   const invalidPhoneMessage = language === 'ar' ? 'اكتب رقم هاتف صحيح' : 'Enter a valid phone number';
   const requiredTrimmed = (value) => (value || '').trim() ? true : t.required;
 
+  const resetClientOrderToken = () => {
+    clientOrderTokenRef.current = '';
+  };
+
+  const getClientOrderToken = () => {
+    if (!clientOrderTokenRef.current) {
+      clientOrderTokenRef.current =
+        window.crypto?.randomUUID?.() || `web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    return clientOrderTokenRef.current;
+  };
+
+  React.useEffect(() => {
+    resetClientOrderToken();
+  }, [items]);
+
+  React.useEffect(() => {
+    if (!user) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    const applyPrefillValue = (field, value) => {
+      if (!value || getValues(field)) {
+        return;
+      }
+
+      setValue(field, value, { shouldDirty: false, shouldValidate: false });
+    };
+
+    const prefillCheckout = async () => {
+      const [profileResult, ordersResult] = await Promise.allSettled([getUserProfile(), getMyOrders()]);
+
+      if (!isMounted) {
+        return;
+      }
+
+      const profile = profileResult.status === 'fulfilled' ? profileResult.value.data : user;
+      const latestOrder =
+        ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value.data)
+          ? ordersResult.value.data[0]
+          : undefined;
+
+      applyPrefillValue('fullName', profile?.name || user.name || '');
+      applyPrefillValue('email', profile?.email || user.email || latestOrder?.guestCustomer?.email || '');
+      applyPrefillValue('phone', latestOrder?.guestCustomer?.phone || '');
+      applyPrefillValue('address', latestOrder?.shippingAddress?.address || '');
+      applyPrefillValue('city', latestOrder?.shippingAddress?.city || '');
+      applyPrefillValue('deliveryNote', latestOrder?.shippingAddress?.deliveryNote || '');
+    };
+
+    prefillCheckout();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getValues, setValue, user]);
+
   const onSubmit = async (data) => {
+    if (isSubmitting) {
+      return;
+    }
+
     if (items.length === 0) {
       setApiError(t.emptyBag);
       return;
@@ -123,10 +195,12 @@ const Checkout = () => {
           deliveryNote: normalizedForm.deliveryNote,
         },
         paymentMethod: 'Cash on Delivery',
+        clientOrderToken: getClientOrderToken(),
       });
 
       const order = response.data;
       clearCart();
+      resetClientOrderToken();
       navigate(`/order-confirmation/${order._id}/${order.receiptToken}`, {
         replace: true,
         state: { order },
@@ -155,7 +229,13 @@ const Checkout = () => {
                 <Truck className="text-primary" size={24} />
                 {t.deliveryInfo}
               </h2>
-              <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2" noValidate>
+              <form
+                id="checkout-form"
+                onSubmit={handleSubmit(onSubmit)}
+                onChangeCapture={resetClientOrderToken}
+                className="grid grid-cols-1 gap-4 md:grid-cols-2"
+                noValidate
+              >
                 <div className="md:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-vintage-700">{t.fullName}</label>
                   <input

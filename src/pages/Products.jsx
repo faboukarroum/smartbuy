@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AlertCircle, ChevronLeft, ChevronRight, Filter, Search, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, Filter, Search, SlidersHorizontal, X } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { getProducts } from '../api/products';
@@ -48,6 +48,15 @@ const Products = () => {
   };
 
   const shouldFocusSearch = searchParams.get('focus') === 'search';
+  const hasActiveFilters = Boolean(searchQuery.trim() || selectedCategory !== 'All' || sortBy !== 'newest' || itemsPerPage !== 20);
+
+  const clearFilters = () => {
+    setSelectedCategory('All');
+    setSearchQuery('');
+    setSortBy('newest');
+    setItemsPerPage(20);
+    setCurrentPage(1);
+  };
 
   useEffect(() => {
     if (!shouldFocusSearch) {
@@ -160,8 +169,18 @@ const Products = () => {
                 placeholder={t.search}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-vintage-200 bg-vintage-50 py-3 pl-12 pr-4 font-bold outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 rtl:pl-4 rtl:pr-12"
+                className="w-full rounded-full border border-vintage-200 bg-vintage-50 py-3 pl-12 pr-12 font-bold outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 rtl:pl-12 rtl:pr-12"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-vintage-500 hover:bg-vintage-100 hover:text-vintage-900 rtl:left-3 rtl:right-auto"
+                  aria-label="Clear search"
+                >
+                  <X size={17} />
+                </button>
+              )}
             </div>
 
             <div className="relative">
@@ -196,6 +215,19 @@ const Products = () => {
             </div>
           </div>
 
+          {hasActiveFilters && (
+            <div className="flex flex-col gap-3 rounded-2xl border border-vintage-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-bold text-vintage-600">
+                {[searchQuery.trim(), selectedCategory !== 'All' ? selectedCategory : '', sortBy !== 'newest' ? sortBy : '', itemsPerPage !== 20 ? `${itemsPerPage} per page` : '']
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+              <button type="button" onClick={clearFilters} className="self-start border-b-2 border-primary text-sm font-black text-primary sm:self-auto">
+                {t.clear}
+              </button>
+            </div>
+          )}
+
           <p className="text-sm font-bold text-vintage-700">
             {t.showing} <span className="text-vintage-900">{indexOfFirstItem + 1}</span> {t.to} <span className="text-vintage-900">{Math.min(indexOfLastItem, totalItems)}</span> {t.of} <span className="text-vintage-900">{totalItems}</span> {t.items}
           </p>
@@ -226,7 +258,7 @@ const Products = () => {
             <h3 className="mb-2 text-xl font-black text-vintage-900">{t.none}</h3>
             <p className="text-vintage-700">{t.noneCopy}</p>
             <button
-              onClick={() => { setSelectedCategory('All'); setSearchQuery(''); }}
+              onClick={clearFilters}
               className="mt-6 border-b-2 border-primary font-black text-primary"
             >
               {t.clear}
