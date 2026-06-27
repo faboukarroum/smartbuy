@@ -349,6 +349,26 @@ const ScannedProductDetail = () => {
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-5 text-lg font-bold text-slate-900">AI Market Prices</h2>
+          <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="mb-3 text-sm font-bold text-slate-900">Barcode Lookup Sources</p>
+            <div className="space-y-2">
+              {(scannedProduct.supplierSources || []).map((source, index) => (
+                <a
+                  key={`${source.url}-${index}`}
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary"
+                >
+                  <span>{source.name || 'Product source'}</span>
+                  <ExternalLink size={15} className="text-slate-400" />
+                </a>
+              ))}
+              {(!scannedProduct.supplierSources || scannedProduct.supplierSources.length === 0) && (
+                <p className="text-sm font-medium text-slate-500">No barcode lookup source found yet.</p>
+              )}
+            </div>
+          </div>
           {scannedProduct.aiResearchSummary && <p className="mb-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">{scannedProduct.aiResearchSummary}</p>}
           <div className="space-y-3">
             {(scannedProduct.marketPriceResults || []).map((price, index) => (
