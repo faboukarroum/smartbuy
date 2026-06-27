@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   ExternalLink,
+  Image as ImageIcon,
   Loader2,
   PackagePlus,
   Save,
@@ -43,6 +46,7 @@ const ScannedProductDetail = () => {
   const [saving, setSaving] = useState(false);
   const [researching, setResearching] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [imagePreviewIndex, setImagePreviewIndex] = useState(0);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [scannedProduct, setScannedProduct] = useState(null);
@@ -143,6 +147,24 @@ const ScannedProductDetail = () => {
     () => productOptions.find((product) => product._id === selectedProductId),
     [productOptions, selectedProductId]
   );
+  const imagePreviewUrls = useMemo(
+    () => String(form.imageCandidates || '').split('\n').map((item) => item.trim()).filter(Boolean),
+    [form.imageCandidates]
+  );
+
+  useEffect(() => {
+    if (imagePreviewIndex > Math.max(0, imagePreviewUrls.length - 1)) {
+      setImagePreviewIndex(0);
+    }
+  }, [imagePreviewIndex, imagePreviewUrls.length]);
+
+  const handlePreviousImage = () => {
+    setImagePreviewIndex((prev) => (prev === 0 ? imagePreviewUrls.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setImagePreviewIndex((prev) => (prev + 1) % imagePreviewUrls.length);
+  };
 
   const handleSave = async () => {
     try {
@@ -325,6 +347,62 @@ const ScannedProductDetail = () => {
             <div>
               <label className="mb-2 block text-sm font-bold text-slate-700">Image URLs</label>
               <textarea value={form.imageCandidates} onChange={(event) => setForm({ ...form, imageCandidates: event.target.value })} rows={5} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-primary" />
+              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                {imagePreviewUrls.length > 0 ? (
+                  <div>
+                    <div className="relative aspect-[4/3] bg-white">
+                      <img
+                        src={imagePreviewUrls[imagePreviewIndex]}
+                        alt={`Scanned product preview ${imagePreviewIndex + 1}`}
+                        className="h-full w-full object-contain"
+                      />
+                      {imagePreviewUrls.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handlePreviousImage}
+                            className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white"
+                            aria-label="Previous image"
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleNextImage}
+                            className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow hover:bg-white"
+                            aria-label="Next image"
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {imagePreviewUrls.length > 1 && (
+                      <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3">
+                        <span className="text-xs font-bold text-slate-500">
+                          Image {imagePreviewIndex + 1} of {imagePreviewUrls.length}
+                        </span>
+                        <div className="flex gap-1">
+                          {imagePreviewUrls.map((url, index) => (
+                            <button
+                              key={`${url}-${index}`}
+                              type="button"
+                              onClick={() => setImagePreviewIndex(index)}
+                              className={`h-2.5 w-2.5 rounded-full ${index === imagePreviewIndex ? 'bg-primary' : 'bg-slate-300'}`}
+                              aria-label={`Show image ${index + 1}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 text-slate-400">
+                    <ImageIcon size={30} />
+                    <p className="text-sm font-medium">Image preview will appear here.</p>
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className="mb-2 block text-sm font-bold text-slate-700">Brand</label>
