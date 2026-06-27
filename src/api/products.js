@@ -190,6 +190,11 @@ export const researchScannedProductPrices = (id) => {
   return axios.post(`${API_BASE_URL}/admin/scanned-products/${id}/research-ai-prices`, {}, config);
 };
 
+export const verifyScannedProductDetails = (id) => {
+  const config = getAuthConfig();
+  return axios.post(`${API_BASE_URL}/admin/scanned-products/${id}/verify-official-details`, {}, config);
+};
+
 export const importScannedProduct = (id, data) => {
   const config = getAuthConfig();
   return axios.post(`${API_BASE_URL}/admin/scanned-products/${id}/import`, data, config);

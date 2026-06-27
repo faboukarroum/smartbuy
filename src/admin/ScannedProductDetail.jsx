@@ -11,6 +11,7 @@ import {
   PackagePlus,
   Save,
   Search,
+  ShieldCheck,
   Sparkles,
   XCircle,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ import {
   rejectScannedProduct,
   researchScannedProductPrices,
   updateScannedProduct,
+  verifyScannedProductDetails,
 } from '../api/products';
 import { formatCurrency } from '../utils/pricing';
 
@@ -44,6 +46,7 @@ const ScannedProductDetail = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [verifyingDetails, setVerifyingDetails] = useState(false);
   const [researching, setResearching] = useState(false);
   const [importing, setImporting] = useState(false);
   const [imagePreviewIndex, setImagePreviewIndex] = useState(0);
@@ -206,6 +209,21 @@ const ScannedProductDetail = () => {
     }
   };
 
+  const handleVerifyDetails = async () => {
+    try {
+      setVerifyingDetails(true);
+      setError('');
+      setNotice('');
+      const { data } = await verifyScannedProductDetails(id);
+      hydrateState(data);
+      setNotice('Official supplier details and image candidates were verified.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Official supplier verification failed.');
+    } finally {
+      setVerifyingDetails(false);
+    }
+  };
+
   const handleReject = async () => {
     if (!window.confirm('Reject this scanned product? It will not affect live website products.')) {
       return;
@@ -302,6 +320,10 @@ const ScannedProductDetail = () => {
           <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60">
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
             Save Staging Data
+          </button>
+          <button onClick={handleVerifyDetails} disabled={verifyingDetails || scannedProduct.scanStatus === 'rejected'} className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60">
+            {verifyingDetails ? <Loader2 className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
+            Verify Official Details
           </button>
           <button onClick={handleResearch} disabled={researching || scannedProduct.scanStatus === 'rejected'} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-primary-dark disabled:opacity-60">
             {researching ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
@@ -426,9 +448,9 @@ const ScannedProductDetail = () => {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-lg font-bold text-slate-900">AI Market Prices</h2>
+          <h2 className="mb-5 text-lg font-bold text-slate-900">Verification Sources</h2>
           <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="mb-3 text-sm font-bold text-slate-900">Barcode Lookup Sources</p>
+            <p className="mb-3 text-sm font-bold text-slate-900">Product Detail Sources</p>
             <div className="space-y-2">
               {(scannedProduct.supplierSources || []).map((source, index) => (
                 <a
@@ -438,15 +460,33 @@ const ScannedProductDetail = () => {
                   rel="noreferrer"
                   className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:text-primary"
                 >
-                  <span>{source.name || 'Product source'}</span>
+                  <span>
+                    {source.name || 'Product source'}
+                    {source.notes ? <span className="ml-2 text-xs font-medium text-slate-400">{source.notes}</span> : null}
+                  </span>
                   <ExternalLink size={15} className="text-slate-400" />
                 </a>
               ))}
               {(!scannedProduct.supplierSources || scannedProduct.supplierSources.length === 0) && (
-                <p className="text-sm font-medium text-slate-500">No barcode lookup source found yet.</p>
+                <p className="text-sm font-medium text-slate-500">No product detail source found yet.</p>
               )}
             </div>
           </div>
+          {scannedProduct.officialVerificationSummary && (
+            <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+              <div className="mb-2 flex items-center gap-2 font-bold">
+                <ShieldCheck size={17} />
+                Official Details Verified
+              </div>
+              <p>{scannedProduct.officialVerificationSummary}</p>
+              {scannedProduct.officialVerifiedAt && (
+                <p className="mt-2 text-xs font-semibold text-emerald-700">
+                  {new Date(scannedProduct.officialVerifiedAt).toLocaleString()}
+                </p>
+              )}
+            </div>
+          )}
+          <h2 className="mb-5 text-lg font-bold text-slate-900">AI Market Prices</h2>
           {scannedProduct.aiResearchSummary && <p className="mb-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">{scannedProduct.aiResearchSummary}</p>}
           <div className="space-y-3">
             {(scannedProduct.marketPriceResults || []).map((price, index) => (
