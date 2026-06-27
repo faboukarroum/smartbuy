@@ -14,6 +14,9 @@ import AdminLayout from '../admin/AdminLayout'
 import Dashboard from '../admin/Dashboard'
 import ProductList from '../admin/ProductList'
 import ProductForm from '../admin/ProductForm'
+import ProductScanner from '../admin/ProductScanner'
+import ScannedProducts from '../admin/ScannedProducts'
+import ScannedProductDetail from '../admin/ScannedProductDetail'
 import Orders from '../admin/Orders'
 import Users from '../admin/Users'
 import Settings from '../admin/Settings'
@@ -40,6 +43,9 @@ const router = createBrowserRouter([
       { path: 'products', element: <ProductList /> },
       { path: 'products/new', element: <ProductForm /> },
       { path: 'products/:id/edit', element: <ProductForm /> },
+      { path: 'product-scanner', element: <ProductScanner /> },
+      { path: 'scanned-products', element: <ScannedProducts /> },
+      { path: 'scanned-products/:id', element: <ScannedProductDetail /> },
       { path: 'orders', element: <Orders /> },
       { path: 'users', element: <Users /> },
       { path: 'settings', element: <Settings /> },

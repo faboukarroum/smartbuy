@@ -145,3 +145,57 @@ export const updateSettings = (data) => {
   const config = getAuthConfig();
   return axios.put(`${API_BASE_URL}/settings`, data, config);
 };
+
+export const getAdminSettings = () => {
+  const config = getAuthConfig();
+  return axios.get(`${API_BASE_URL}/settings/admin`, config);
+};
+
+export const updateAdminSettings = (data) => {
+  const config = getAuthConfig();
+  return axios.put(`${API_BASE_URL}/settings/admin`, data, config);
+};
+
+export const testAiSettings = () => {
+  const config = getAuthConfig();
+  return axios.post(`${API_BASE_URL}/settings/admin/test-ai`, {}, config);
+};
+
+// Scanned Product API
+export const scanProductBarcode = (data) => {
+  const config = getAuthConfig();
+  return axios.post(`${API_BASE_URL}/admin/scanned-products/scan`, data, config);
+};
+
+export const getScannedProducts = (params = {}) => {
+  const config = getAuthConfig();
+  return axios.get(`${API_BASE_URL}/admin/scanned-products`, {
+    ...config,
+    params,
+  });
+};
+
+export const getScannedProductById = (id) => {
+  const config = getAuthConfig();
+  return axios.get(`${API_BASE_URL}/admin/scanned-products/${id}`, config);
+};
+
+export const updateScannedProduct = (id, data) => {
+  const config = getAuthConfig();
+  return axios.put(`${API_BASE_URL}/admin/scanned-products/${id}`, data, config);
+};
+
+export const researchScannedProductPrices = (id) => {
+  const config = getAuthConfig();
+  return axios.post(`${API_BASE_URL}/admin/scanned-products/${id}/research-ai-prices`, {}, config);
+};
+
+export const importScannedProduct = (id, data) => {
+  const config = getAuthConfig();
+  return axios.post(`${API_BASE_URL}/admin/scanned-products/${id}/import`, data, config);
+};
+
+export const rejectScannedProduct = (id, data = {}) => {
+  const config = getAuthConfig();
+  return axios.post(`${API_BASE_URL}/admin/scanned-products/${id}/reject`, data, config);
+};
