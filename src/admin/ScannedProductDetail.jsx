@@ -40,6 +40,37 @@ const candidatesToText = (items = [], key = 'value') => items.map((item) => item
 const textToCandidates = (value) => String(value || '').split('\n').map((item) => ({ value: item.trim(), source: 'manual' })).filter((item) => item.value);
 const textToImages = (value) => String(value || '').split('\n').map((item) => ({ url: item.trim(), source: 'manual' })).filter((item) => item.url);
 const bestValue = (items = [], key = 'value') => items.find((item) => item[key])?.[key] || '';
+const textLines = (value) => String(value || '').split('\n').map((item) => item.trim()).filter(Boolean);
+const firstTextLine = (value) => textLines(value)[0] || '';
+
+const listPreview = (items = [], emptyText = 'Empty') => {
+  const lines = Array.isArray(items) ? items.filter(Boolean) : textLines(items);
+
+  if (lines.length === 0) {
+    return emptyText;
+  }
+
+  if (lines.length === 1) {
+    return lines[0];
+  }
+
+  return `${lines[0]} + ${lines.length - 1} more`;
+};
+
+const FieldToggle = ({ checked, label, preview, onChange }) => (
+  <label className="flex min-h-[84px] gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary"
+    />
+    <span className="min-w-0">
+      <span className="block text-sm font-bold text-slate-900">{label}</span>
+      <span className="mt-1 block break-words text-xs leading-5 text-slate-500">{preview || 'Empty'}</span>
+    </span>
+  </label>
+);
 
 const ScannedProductDetail = () => {
   const { id } = useParams();
@@ -151,9 +182,56 @@ const ScannedProductDetail = () => {
     [productOptions, selectedProductId]
   );
   const imagePreviewUrls = useMemo(
-    () => String(form.imageCandidates || '').split('\n').map((item) => item.trim()).filter(Boolean),
+    () => textLines(form.imageCandidates),
     [form.imageCandidates]
   );
+
+  const importPreviewValues = useMemo(() => {
+    const imageUrls = textLines(form.imageCandidates);
+
+    return {
+      name: firstTextLine(form.nameCandidates),
+      description: firstTextLine(form.descriptionCandidates),
+      details: textLines(form.detailsCandidates),
+      image: imageUrls[0] || '',
+      images: imageUrls,
+      category: form.category || 'home',
+      price: values.price,
+      priceLbp: values.priceLbp,
+      stock: values.stock,
+      barcode: scannedProduct?.barcode || '',
+      brand: form.brand,
+      manufacturer: form.manufacturer,
+    };
+  }, [form, scannedProduct?.barcode, values.price, values.priceLbp, values.stock]);
+
+  const importFieldGroups = useMemo(() => [
+    {
+      title: 'Product basics',
+      fields: [
+        ['name', 'Product name', importPreviewValues.name],
+        ['description', 'Description', importPreviewValues.description],
+        ['category', 'Category', importPreviewValues.category],
+        ['metadata', 'Barcode / Brand / Manufacturer', listPreview([importPreviewValues.barcode, importPreviewValues.brand, importPreviewValues.manufacturer])],
+      ],
+    },
+    {
+      title: 'Media and specs',
+      fields: [
+        ['image', 'Main image', importPreviewValues.image],
+        ['images', 'Gallery images', `${importPreviewValues.images.length} image${importPreviewValues.images.length === 1 ? '' : 's'}`],
+        ['details', 'Details / specs', listPreview(importPreviewValues.details)],
+      ],
+    },
+    {
+      title: 'Selling fields',
+      fields: [
+        ['price', 'USD price', importPreviewValues.price || 'Empty'],
+        ['priceLbp', 'LBP display price', importPreviewValues.priceLbp || 'Empty'],
+        ['stock', 'Stock quantity', importPreviewValues.stock || '0'],
+      ],
+    },
+  ], [importPreviewValues]);
 
   useEffect(() => {
     if (imagePreviewIndex > Math.max(0, imagePreviewUrls.length - 1)) {
@@ -259,9 +337,10 @@ const ScannedProductDetail = () => {
       setError('');
       setNotice('');
       const importValues = {
-        ...values,
-        details: String(values.details || '').split('\n').map((item) => item.trim()).filter(Boolean),
-        images: String(values.images || '').split('\n').map((item) => item.trim()).filter(Boolean),
+        ...importPreviewValues,
+        price: values.price,
+        priceLbp: values.priceLbp,
+        stock: values.stock,
       };
 
       const { data } = await importScannedProduct(id, {
@@ -312,7 +391,7 @@ const ScannedProductDetail = () => {
               </span>
               <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Staging only, not live</span>
             </div>
-            <h1 className="text-2xl font-serif font-bold text-slate-900">{values.name || 'Scanned Product'}</h1>
+            <h1 className="break-words text-2xl font-serif font-bold text-slate-900">{importPreviewValues.name || 'Scanned Product'}</h1>
             <p className="font-mono text-sm text-slate-500">{scannedProduct.barcode}</p>
           </div>
         </div>
@@ -534,7 +613,7 @@ const ScannedProductDetail = () => {
 
         {importMode === 'update' && (
           <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <form onSubmit={handleProductSearch} className="mb-3 flex gap-2">
+            <form onSubmit={handleProductSearch} className="mb-3 grid gap-2 sm:grid-cols-[1fr_auto]">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input value={productSearch} onChange={(event) => setProductSearch(event.target.value)} className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-primary" placeholder="Search existing products..." />
@@ -554,39 +633,36 @@ const ScannedProductDetail = () => {
           </div>
         )}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {[
-            ['name', 'Product Name', 'text'],
-            ['description', 'Description', 'textarea'],
-            ['details', 'Details / Specs', 'textarea'],
-            ['image', 'Main Image URL', 'text'],
-            ['images', 'Gallery Image URLs', 'textarea'],
-            ['category', 'Category', 'category'],
-            ['price', 'USD Price', 'number'],
-            ['priceLbp', 'LBP Display Price', 'number'],
-            ['stock', 'Stock Quantity', 'number'],
-            ['metadata', 'Barcode / Brand / Manufacturer', 'metadata'],
-          ].map(([field, label, type]) => (
-            <div key={field} className="rounded-xl border border-slate-200 p-4">
-              <label className="mb-3 flex items-center gap-3 text-sm font-bold text-slate-800">
-                <input type="checkbox" checked={Boolean(fields[field])} onChange={(event) => setFields({ ...fields, [field]: event.target.checked })} className="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary" />
-                {label}
-              </label>
-              {type === 'textarea' ? (
-                <textarea value={values[field]} onChange={(event) => setValues({ ...values, [field]: event.target.value })} rows={field === 'description' ? 4 : 3} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-primary" />
-              ) : type === 'category' ? (
-                <select value={values.category} onChange={(event) => setValues({ ...values, category: event.target.value })} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-primary">
-                  {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-                </select>
-              ) : type === 'metadata' ? (
-                <div className="grid gap-2">
-                  <input value={values.barcode} onChange={(event) => setValues({ ...values, barcode: event.target.value })} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-primary" placeholder="Barcode" />
-                  <input value={values.brand} onChange={(event) => setValues({ ...values, brand: event.target.value })} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-primary" placeholder="Brand" />
-                  <input value={values.manufacturer} onChange={(event) => setValues({ ...values, manufacturer: event.target.value })} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-primary" placeholder="Manufacturer" />
-                </div>
-              ) : (
-                <input type={type} value={values[field]} onChange={(event) => setValues({ ...values, [field]: event.target.value })} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-primary" />
-              )}
+        <div className="mb-5 grid gap-3 sm:grid-cols-3">
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-700">USD Price</label>
+            <input type="number" value={values.price} onChange={(event) => setValues({ ...values, price: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-700">LBP Price</label>
+            <input type="number" value={values.priceLbp} onChange={(event) => setValues({ ...values, priceLbp: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-bold text-slate-700">Stock</label>
+            <input type="number" value={values.stock} onChange={(event) => setValues({ ...values, stock: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {importFieldGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">{group.title}</h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                {group.fields.map(([field, label, preview]) => (
+                  <FieldToggle
+                    key={field}
+                    checked={Boolean(fields[field])}
+                    label={label}
+                    preview={preview}
+                    onChange={(event) => setFields({ ...fields, [field]: event.target.checked })}
+                  />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -595,7 +671,7 @@ const ScannedProductDetail = () => {
           type="button"
           onClick={handleImport}
           disabled={importing || scannedProduct.scanStatus === 'rejected'}
-          className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {importing ? <Loader2 className="animate-spin" size={18} /> : <PackagePlus size={18} />}
           {importMode === 'update' ? 'Update Selected Product Fields' : 'Create Website Product'}
